@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --color-warm-beige: #F5F7F5;
+  --color-deep-navy: #0B1B15;
+  --color-coral: #D07A60;
+  --color-teal: #1D8A65;
+  --color-white: #FFFFFF;
+  --color-muted: #4A5A54;
+  --color-surface: #FFFFFF;
+  --color-border-warm: #DDE2DF;
+}
+
+[data-theme="dark"], .dark {
+  --color-warm-beige: #F5F7F5;
+  --color-deep-navy: #0B1B15;
+  --color-coral: #D07A60;
+  --color-teal: #1D8A65;
+  --color-white: #FFFFFF;
+  --color-muted: #4A5A54;
+  --color-surface: #FFFFFF;
+  --color-border-warm: #DDE2DF;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-warm-beige text-deep-navy font-sans antialiased transition-colors duration-300;
+  }
+  section[id] {
+    scroll-margin-top: 100px;
+  }
+}
+
+.glass {
+  @apply backdrop-blur-md bg-white/70 dark:bg-warm-beige/70 border-b border-border-warm;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.shadow-warm {
+  box-shadow: 0 4px 24px rgba(15, 35, 69, 0.08);
+}
+
+.shadow-warm-hover {
+  box-shadow: 0 12px 32px rgba(15, 35, 69, 0.12);
+}

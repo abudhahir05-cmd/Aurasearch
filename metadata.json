@@ -1,0 +1,8 @@
+{
+  "name": "AuraSearch",
+  "description": "Turning Influence into Predictable Outcomes. AI-powered influencer intelligence platform for regional brands in India.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
