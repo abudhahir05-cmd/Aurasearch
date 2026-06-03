@@ -357,8 +357,8 @@ export const EnterpriseDashboard = () => {
             <svg viewBox="0 0 400 450" className="w-[360px] h-full object-contain select-none opacity-50">
               <path 
                 d="M 180,40 L 200,45 L 210,55 L 220,70 L 215,90 L 210,105 L 230,120 L 245,130 L 255,135 L 250,150 L 240,160 L 243,175 L 252,185 L 260,195 L 270,190 L 280,200 L 295,195 L 305,210 L 310,230 L 295,245 L 285,240 L 270,245 L 260,250 L 250,260 L 255,275 L 250,285 L 235,280 L 225,290 L 215,310 L 200,325 L 190,340 L 180,360 L 175,380 L 172,395 L 168,410 L 165,420 L 160,400 L 155,380 L 148,360 L 144,340 L 140,320 L 135,300 L 138,285 L 125,280 L 115,275 L 105,270 L 95,265 L 85,255 L 80,240 L 75,220 L 60,215 L 50,200 L 45,185 L 40,170 L 55,160 L 70,165 L 80,155 L 90,140 L 100,135 L 110,130 L 120,135 L 130,140 L 140,130 L 145,115 L 150,95 L 152,70 L 160,55 L 170,45 Z" 
-                fill="#DDE2DF" 
-                stroke="#4A5A54" 
+                fill="#E2E8F0" 
+                stroke="#94A3B8" 
                 strokeWidth="1.2" 
                 strokeLinecap="round"
                 strokeLinejoin="round"

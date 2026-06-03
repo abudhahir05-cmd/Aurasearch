@@ -42,6 +42,7 @@ import {
   FileText,
   ExternalLink,
   Search,
+  SlidersHorizontal,
   ShoppingCart,
   Coffee,
   Smartphone,
@@ -69,6 +70,7 @@ import { AvailabilityAlerts } from './components/AvailabilityAlerts';
 import { CampaignTimelineBuilder } from './components/CampaignTimelineBuilder';
 import { DesignSystemPage } from './components/DesignSystemPage';
 import { EnterpriseDashboard } from './components/EnterpriseDashboard';
+import { CreatorProfile } from './components/CreatorProfile';
 const productLogo = '/src/assets/images/product_logo_1779731862866.png';
 
 const LogoIcon = ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg', className?: string }) => {
@@ -118,6 +120,19 @@ const CREATORS: Creator[] = [
   { id: 4, name: "Rahul Menon", city: "Kochi", niche: "Comedy", followers: "19K", score: 79 },
   { id: 5, name: "Deepa Iyer", city: "Mumbai", niche: "Fashion", followers: "35K", score: 73 },
   { id: 6, name: "Vijay Kumar", city: "Hyderabad", niche: "Tech", followers: "22K", score: 68 },
+  { id: 7, name: "Suresh Pillai", city: "Kochi", niche: "Food", followers: "110K", score: 95 },
+  { id: 8, name: "Sneha Sen", city: "Delhi", niche: "Beauty", followers: "85K", score: 89 },
+  { id: 9, name: "Arjun Mehta", city: "Mumbai", niche: "Finance", followers: "55K", score: 82 },
+  { id: 10, name: "Aditi Rao", city: "Chennai", niche: "Fashion", followers: "72K", score: 81 },
+  { id: 11, name: "Vikram Seth", city: "Bangalore", niche: "Tech", followers: "120K", score: 90 },
+  { id: 12, name: "Meera Jasmine", city: "Coimbatore", niche: "Food", followers: "33K", score: 76 },
+  { id: 13, name: "Rohan Das", city: "Delhi", niche: "Comedy", followers: "94K", score: 85 },
+  { id: 14, name: "Kiran Bedi", city: "Hyderabad", niche: "Education", followers: "41K", score: 72 },
+  { id: 15, name: "Siddharth Roy", city: "Pune", niche: "Fitness", followers: "50K", score: 78 },
+  { id: 16, name: "Divya Spandana", city: "Bangalore", niche: "Travel", followers: "68K", score: 83 },
+  { id: 17, name: "Gautham Vasudev", city: "Chennai", niche: "Comedy", followers: "105K", score: 88 },
+  { id: 18, name: "Pooja Hegde", city: "Mumbai", niche: "Beauty", followers: "150K", score: 93 },
+  { id: 20, name: "Rajesh Koothrapali", city: "Pune", niche: "Tech", followers: "15K", score: 64 },
 ];
 
 const PROBLEM_CARDS = [
@@ -139,11 +154,11 @@ const PROBLEM_CARDS = [
 ];
 
 const SCRAG_DIMENSIONS = [
-  { key: 'S', name: 'Social Activity', desc: 'Real-time responsiveness and content consistency across platforms.' },
-  { key: 'C', name: 'Context Relevance', desc: 'Alignment between creator content and specific brand categories.' },
-  { key: 'R', name: 'Regional Influence', desc: 'Deep penetration into specific tier-2 and tier-3 city dialects.' },
-  { key: 'A', name: 'Audience Trust', desc: 'Verified sentiment analysis of comment sections and direct mentions.' },
-  { key: 'G', name: 'Growth Momentum', desc: 'Velocity of new audience acquisition relative to the niche.' }
+  { key: 'S', name: 'Social Activity', desc: 'Real-time responsiveness and content consistency across platforms.', link: 'https://en.wikipedia.org/wiki/Social_network_analysis' },
+  { key: 'C', name: 'Context Relevance', desc: 'Alignment between creator content and specific brand categories.', link: 'https://en.wikipedia.org/wiki/Context_analysis' },
+  { key: 'R', name: 'Regional Influence', desc: 'Deep penetration into specific tier-2 and tier-3 city dialects.', link: 'https://en.wikipedia.org/wiki/Sociolinguistics' },
+  { key: 'A', name: 'Audience Trust', desc: 'Verified sentiment analysis of comment sections and direct mentions.', link: 'https://en.wikipedia.org/wiki/Sentiment_analysis' },
+  { key: 'G', name: 'Growth Momentum', desc: 'Velocity of new audience acquisition relative to the niche.', link: 'https://en.wikipedia.org/wiki/Virality' }
 ];
 
 const STEPS = [
@@ -181,6 +196,7 @@ const TOOLS_METADATA = [
   { id: 'comparison', title: 'Creator Comparison', description: 'Compare metrics, regional relevance, and dialect focus of two creators side-by-side.', icon: <Layers className="w-5 h-5" /> },
   { id: 'roi-estimator', title: 'ROI Estimator', description: 'Estimate conversions, CPA, and return on ad spend across demographics.', icon: <CircleDollarSign className="w-5 h-5" /> },
   { id: 'niche-chart', title: 'Niche Analytics', description: 'Inspect category performance, dialect depth, and trust indicators.', icon: <BarChart3 className="w-5 h-5" /> },
+  { id: 'creator-profile', title: 'Creator Profile Insight', description: 'Deep-dive analytical dashboard with regional reach, sentiment maps, content feed, and collab history.', icon: <Users className="w-5 h-5" /> },
 ];
 
 const PlatformToolsOverview = ({ onLaunchTool }: { onLaunchTool: (id: string) => void }) => {
@@ -196,7 +212,7 @@ const PlatformToolsOverview = ({ onLaunchTool }: { onLaunchTool: (id: string) =>
           Explore our suite of predictive modeling engines, region trackers, and strategic campaign builders. Launch any tool directly to model your local strategy.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {TOOLS_METADATA.map((tool) => (
+          {TOOLS_METADATA.filter(t => t.id !== 'creator-profile').map((tool) => (
             <div 
               key={tool.id} 
               onClick={() => onLaunchTool(tool.id)}
@@ -357,10 +373,10 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
   const [activeSection, setActiveSection] = useState('hero');
 
   const sections = [
-    'hero', 'scrag-solution', 'how-it-works', 'sandbox', 'predictor', 
+    'hero', 'how-it-works', 'sandbox', 'predictor', 
     'brief-generator', 'calculator', 'leaderboard', 'comparison', 
-    'roi-estimator', 'niche-chart', 'use-case', 'creators', 
-    'notify-me', 'pricing'
+    'roi-estimator', 'niche-chart', 'creators', 
+    'notify-me'
   ];
 
   useEffect(() => {
@@ -439,7 +455,6 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
     {
       group: 'Core Engine',
       items: [
-        { icon: <Database size={18} />, title: 'SCRAG Score Engine', desc: 'How we score every creator across 5 dimensions', href: '#scrag-solution' },
         { icon: <Activity size={18} />, title: 'How It Works', desc: '4-step process from scan to prediction', href: '#how-it-works' },
         { icon: <BarChart3 size={18} />, title: 'Niche Analytics', desc: 'Compare performance across categories', href: '#niche-chart' },
       ]
@@ -627,7 +642,7 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
           <div className="hidden lg:flex items-center gap-6 h-full">
             <NavItem 
               label="Platform" 
-              active={isSectionActive(['scrag-solution', 'how-it-works', 'niche-chart', 'sandbox', 'predictor', 'calculator'])}
+              active={isSectionActive(['how-it-works', 'niche-chart', 'sandbox', 'predictor', 'calculator'])}
             >
               <div className="p-2 grid grid-cols-2 gap-2 w-[640px]">
                 {PLATFORM_LINKS.map((col, idx) => (
@@ -673,18 +688,6 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
             </NavItem>
 
             <NavItem 
-              label="Solutions" 
-              active={isSectionActive(['use-case', 'creators', 'notify-me'])}
-            >
-              <div className="p-2 w-[340px]">
-                <div className="px-4 pt-4 pb-2 text-[10px] font-black text-muted dark:text-white/30 uppercase tracking-[0.15em]">Verticals</div>
-                {SOLUTIONS_LINKS.map((item, i) => (
-                  item.divider ? <div key={i} className="my-2 h-px bg-border-warm dark:bg-white/10 mx-4" /> : <DropdownItem key={i} {...item} />
-                ))}
-              </div>
-            </NavItem>
-
-            <NavItem 
               label="Resources" 
               active={false}
             >
@@ -698,12 +701,7 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
               </div>
             </NavItem>
 
-            <NavItem 
-              label="Pricing" 
-              active={isSectionActive(['pricing'])}
-              hasDropdown={false}
-              onClick={(e) => onNavClick(e as any, '#pricing')}
-            />
+
           </div>
 
           <div className="flex items-center gap-4">
@@ -751,7 +749,6 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
               {[
                 { label: 'Platform', links: PLATFORM_LINKS.flatMap(g => g.items) },
                 { label: 'Features', links: FEATURES_LINKS.flatMap(g => g.items) },
-                { label: 'Solutions', links: SOLUTIONS_LINKS.filter(l => !l.divider) },
                 { label: 'Resources', links: RESOURCES_LINKS.flatMap(g => g.items) },
               ].map((group) => (
                 <div key={group.label} className="border-b border-white/5">
@@ -796,13 +793,7 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
                   </AnimatePresence>
                 </div>
               ))}
-              <a 
-                href="#pricing" 
-                onClick={(e) => { setIsMobileMenuOpen(false); onNavClick(e as any, '#pricing'); }}
-                className="block py-6 text-xl font-bold border-b border-white/5"
-              >
-                Pricing
-              </a>
+
             </div>
 
             <div className="mt-12 space-y-6 pt-12 border-t border-white/5">
@@ -1216,29 +1207,335 @@ const ScragCalculator = ({ isSubpage = false }: { isSubpage?: boolean }) => {
 };
 
 const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
-  const [filter, setFilter] = useState('All');
-  const cities = ['All', 'Coimbatore', 'Chennai', 'Bangalore', 'Mumbai'];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState('All');
+  const [selectedNiche, setSelectedNiche] = useState('All');
+  const [minScore, setMinScore] = useState(60);
+
+  // Dynamically extract unique cities and niches from dataset
+  const cities = useMemo(() => {
+    const allCities = CREATORS.map(c => c.city);
+    return ['All', ...Array.from(new Set(allCities))].sort();
+  }, []);
+
+  const niches = useMemo(() => {
+    const allNiches = CREATORS.map(c => c.niche);
+    return ['All', ...Array.from(new Set(allNiches))].sort();
+  }, []);
 
   const filtered = useMemo(() => {
-    if (filter === 'All') return CREATORS;
-    return CREATORS.filter(c => c.city === filter);
-  }, [filter]);
+    return CREATORS.filter(c => {
+      const matchesSearch = searchQuery === '' || 
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.niche.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCity = selectedCity === 'All' || c.city === selectedCity;
+      const matchesNiche = selectedNiche === 'All' || c.niche === selectedNiche;
+      const matchesScore = c.score >= minScore;
+      
+      return matchesSearch && matchesCity && matchesNiche && matchesScore;
+    }).sort((a, b) => b.score - a.score);
+  }, [searchQuery, selectedCity, selectedNiche, minScore]);
+
+  // Export search records as standard fully compliant CSV format
+  const exportToCSV = () => {
+    const headers = ['Rank', 'Name', 'City', 'Niche', 'Followers', 'SCRAG Score'];
+    const rows = filtered.map((c, idx) => [
+      idx + 1,
+      `"${c.name.replace(/"/g, '""')}"`,
+      `"${c.city.replace(/"/g, '""')}"`,
+      `"${c.niche.replace(/"/g, '""')}"`,
+      `"${c.followers}"`,
+      c.score
+    ]);
+
+    const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `aurasearch_leaderboard_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Export printed/saved premium layout document completely safety bypassing standard popup blocker
+  const exportToPDF = () => {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.zIndex = '-1000';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (!doc) return;
+
+    const formattedDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short'
+    });
+
+    const activeFiltersText = [
+      selectedCity !== 'All' ? `City: ${selectedCity}` : null,
+      selectedNiche !== 'All' ? `Niche: ${selectedNiche}` : null,
+      minScore > 60 ? `Min Score: ${minScore}` : null,
+      searchQuery ? `Search Query: "${searchQuery}"` : null
+    ].filter(Boolean).join(', ') || 'None';
+
+    const rowsHTML = filtered.map((c, i) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 12px 16px; font-weight: bold; color: #475569;">${i + 1}</td>
+        <td style="padding: 12px 16px; font-weight: bold; color: #0f172a;">${c.name}</td>
+        <td style="padding: 12px 16px; color: #334155;">${c.city}</td>
+        <td style="padding: 12px 16px;"><span style="background-color: rgba(13, 148, 136, 0.1); color: #0d9488; padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500;">${c.niche}</span></td>
+        <td style="padding: 12px 16px; color: #475569; font-family: monospace;">${c.followers.toLocaleString()}</td>
+        <td style="padding: 12px 16px; text-align: right; font-family: Georgia, serif; font-size: 18px; font-weight: bold; color: ${c.score >= 80 ? '#0d9488' : c.score >= 70 ? '#ea580c' : '#d97706'}">${c.score}</td>
+      </tr>
+    `).join('');
+
+    doc.write(`
+      <html>
+        <head>
+          <title>AuraSearch Audited Leaderboard Report</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+            body { font-family: 'Inter', system-ui, sans-serif; background-color: #ffffff; color: #0f172a; padding: 40px; margin: 0; }
+            .header-container { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #ea580c; padding-bottom: 20px; margin-bottom: 30px; }
+            .title { font-family: Georgia, serif; font-size: 28px; font-weight: bold; color: #0b1528; margin: 0; }
+            .subtitle { font-size: 11px; font-weight: bold; color: #ea580c; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+            .brand-logo { font-family: Georgia, serif; font-weight: bold; font-size: 18px; color: #0b1528; }
+            .brand-logo span { color: #ea580c; }
+            .meta-grid { display: grid; grid-template-cols: 1fr 1fr; gap: 20px; font-size: 13px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 18px; border-radius: 12px; margin-bottom: 30px; }
+            .meta-item { margin-bottom: 6px; }
+            .meta-label { font-weight: 600; color: #0f172a; }
+            table { width: 100%; border-collapse: collapse; background-color: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 30px; font-size: 13px; }
+            th { background-color: #f1f5f9; border-bottom: 2px solid #e2e8f0; padding: 14px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; }
+            .footer { border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 11px; color: #64748b; text-align: center; margin-top: 50px; }
+          </style>
+        </head>
+        <body>
+          <div class="header-container">
+            <div>
+              <h1 class="title">AuraSearch Leaderboard Export</h1>
+              <div class="subtitle">Audited Creator Performance Insights</div>
+            </div>
+            <div class="brand-logo">Aura<span>Search</span></div>
+          </div>
+          
+          <div class="meta-grid">
+            <div>
+              <div class="meta-item"><span class="meta-label">Generated on:</span> \${formattedDate}</div>
+              <div class="meta-item"><span class="meta-label">Auditing Standard:</span> SCRAG Framework v1.4</div>
+            </div>
+            <div>
+              <div class="meta-item"><span class="meta-label">Active Filters:</span> \${activeFiltersText}</div>
+              <div class="meta-item"><span class="meta-label">Database Records Found:</span> \${filtered.length} creators</div>
+            </div>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 80px;">Rank</th>
+                <th>Name</th>
+                <th>City</th>
+                <th>Niche</th>
+                <th>Followers</th>
+                <th style="text-align: right; width: 120px;">SCRAG Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              \${rowsHTML}
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            CONFIDENTIAL AUDIT REPORT &bull; Verified via AuraSearch Professional Platform &bull; Powered by Antigravity Agent Verification
+          </div>
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    // Trigger printing once content is ready
+    setTimeout(() => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      // Remove iframe from document after print dialog closes
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
+    }, 500);
+  };
 
   const innerContent = (
     <>
-      <div className="flex flex-wrap justify-center gap-3 mb-12">
-        {cities.map(city => (
-          <button 
-            key={city}
-            onClick={() => setFilter(city)}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${filter === city ? 'bg-deep-navy dark:bg-white dark:text-deep-navy text-white shadow-md' : 'bg-warm-beige dark:bg-white/10 text-deep-navy dark:text-white hover:bg-border-warm dark:hover:bg-white/20'}`}
-          >
-            {city}
-          </button>
-        ))}
+      {/* Advanced Discovery Controls */}
+      <div className="mb-10 bg-white/70 dark:bg-deep-navy/40 backdrop-blur-md border border-border-warm dark:border-white/10 p-6 rounded-[24px] shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          
+          {/* Global Search Bar */}
+          <div className="md:col-span-5 relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-muted dark:text-white/40">
+              <Search size={18} />
+            </span>
+            <input
+              type="text"
+              id="leaderboard-search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search creators by name, city, or niche..."
+              className="w-full pl-11 pr-10 py-3 rounded-2xl bg-warm-beige/50 dark:bg-deep-navy/70 border border-border-warm/65 dark:border-white/10 text-deep-navy dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-coral/20 focus:border-coral transition-all placeholder:text-muted/60"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                id="clear-search-btn"
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted hover:text-coral transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* City Filter Dropdown */}
+          <div className="md:col-span-3">
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-muted/60 dark:text-white/40 text-xs font-semibold uppercase tracking-wider">City:</span>
+              <select
+                id="city-filter"
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="w-full pl-16 pr-10 py-3 rounded-2xl bg-warm-beige/50 dark:bg-deep-navy/70 border border-border-warm/65 dark:border-white/10 text-deep-navy dark:text-white text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-coral/20 focus:border-coral transition-all font-medium"
+              >
+                {cities.map(city => (
+                  <option key={city} value={city} className="bg-white dark:bg-deep-navy text-deep-navy dark:text-white">
+                    {city}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-muted dark:text-white/40">
+                <ChevronDown size={16} />
+              </div>
+            </div>
+          </div>
+
+          {/* Niche Filter Dropdown */}
+          <div className="md:col-span-2">
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-muted/60 dark:text-white/40 text-xs font-semibold uppercase tracking-wider">Niche:</span>
+              <select
+                id="niche-filter"
+                value={selectedNiche}
+                onChange={(e) => setSelectedNiche(e.target.value)}
+                className="w-full pl-[4.2rem] pr-10 py-3 rounded-2xl bg-warm-beige/50 dark:bg-deep-navy/70 border border-border-warm/65 dark:border-white/10 text-deep-navy dark:text-white text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-coral/20 focus:border-coral transition-all font-medium"
+              >
+                {niches.map(niche => (
+                  <option key={niche} value={niche} className="bg-white dark:bg-deep-navy text-deep-navy dark:text-white">
+                    {niche}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-muted dark:text-white/40">
+                <ChevronDown size={16} />
+              </div>
+            </div>
+          </div>
+
+          {/* Reset Filters / Matching Stats */}
+          <div className="md:col-span-2 flex items-center justify-end gap-3 w-full">
+            {(searchQuery || selectedCity !== 'All' || selectedNiche !== 'All' || minScore > 60) && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCity('All');
+                  setSelectedNiche('All');
+                  setMinScore(60);
+                }}
+                id="reset-leaderboard-filters"
+                className="text-xs font-bold text-coral hover:text-coral/80 flex items-center gap-1 py-2 px-3 bg-coral/5 hover:bg-coral/10 rounded-xl transition-all"
+              >
+                Reset
+              </button>
+            )}
+            <span className="text-[11px] font-bold font-mono text-muted/65 dark:text-white/50 text-right">
+              {filtered.length} found
+            </span>
+          </div>
+
+        </div>
+
+        {/* Min SCRAG Score Slider */}
+        <div className="mt-5 pt-5 border-t border-border-warm/65 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1">
+            <span className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest min-w-[125px]">
+              Min SCRAG Score:
+            </span>
+            <input
+              type="range"
+              min="60"
+              max="95"
+              step="1"
+              value={minScore}
+              onChange={(e) => setMinScore(Number(e.target.value))}
+              id="scrag-score-range-slider"
+              className="flex-1 accent-coral h-1.5 bg-warm-beige dark:bg-white/10 rounded-lg cursor-pointer"
+            />
+            <span className="px-3 py-1 rounded-xl bg-teal/10 border border-teal/20 text-teal dark:text-teal font-mono font-bold text-xs shadow-sm">
+              &ge; {minScore} Rating
+            </span>
+          </div>
+          <div className="hidden md:flex gap-1.5 text-[10px] items-center text-muted/70 dark:text-white/30 font-semibold uppercase tracking-wider">
+            <SlidersHorizontal size={10} /> Active Filters: {[
+              selectedCity !== 'All' && `City: ${selectedCity}`,
+              selectedNiche !== 'All' && `Niche: ${selectedNiche}`,
+              minScore > 60 && `Score >= ${minScore}`,
+              searchQuery && 'Search'
+            ].filter(Boolean).join(', ') || 'None'}
+          </div>
+        </div>
       </div>
       
-      <div className="bg-white dark:bg-deep-navy/10 rounded-[20px] shadow-warm border border-border-warm dark:border-white/10 overflow-hidden">
+      <div className="bg-white dark:bg-deep-navy/10 rounded-[24px] shadow-warm border border-border-warm dark:border-white/10 overflow-hidden">
+        {/* Table Branded Header Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-8 py-5 bg-warm-beige/10 dark:bg-white/5 border-b border-border-warm dark:border-white/10 gap-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-teal" />
+            <h4 className="font-serif text-base font-bold text-deep-navy dark:text-white">Audited Leaderboard Records</h4>
+          </div>
+          
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={exportToCSV}
+              id="export-csv-btn"
+              title="Download results as a spreadsheet CSV file"
+              className="text-xs font-bold text-deep-navy dark:text-white hover:text-coral hover:border-coral transition-all px-3 py-1.5 border border-border-warm dark:border-white/15 rounded-xl bg-white dark:bg-transparent flex items-center gap-1.5 shadow-sm cursor-pointer hover:shadow"
+            >
+              <Download size={13} className="text-muted" /> Export CSV
+            </button>
+            <button
+              onClick={exportToPDF}
+              id="export-pdf-btn"
+              title="Save a beautifully formatted document PDF file"
+              className="text-xs font-bold text-white bg-coral hover:bg-coral/90 transition-all px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer hover:shadow-lg"
+            >
+              <FileText size={13} /> Export PDF Report
+            </button>
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -1252,33 +1549,65 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
               </tr>
             </thead>
             <tbody>
-              <AnimatePresence mode="popLayout">
-                {filtered.map((creator, idx) => (
-                  <motion.tr 
-                    key={creator.id}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="border-b border-border-warm dark:border-white/10 hover:bg-warm-beige/20 dark:hover:bg-white/5 transition-colors cursor-default"
-                  >
-                    <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60">
-                      {idx === 0 && <span className="bg-coral text-white text-[10px] px-2 py-0.5 rounded mr-2">Top Pick</span>}
-                      {idx + 1}
+              <AnimatePresence mode="popLayout text-left">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-20 text-muted dark:text-white/40 text-sm">
+                      <div className="flex flex-col items-center gap-3 justify-center max-w-sm mx-auto">
+                        <SlidersHorizontal size={28} className="text-coral opacity-50 animate-pulse" />
+                        <span className="font-serif text-lg font-bold text-deep-navy dark:text-white">No results found</span>
+                        <span className="text-xs leading-relaxed text-muted/80">
+                          Try relaxing your filtering parameters, adjusting the minimum SCRAG rating score slider, or typing a different keyword.
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSearchQuery('');
+                            setSelectedCity('All');
+                            setSelectedNiche('All');
+                            setMinScore(60);
+                          }}
+                          className="mt-2 text-xs font-bold text-white bg-coral hover:bg-coral/95 px-4 py-2 rounded-xl transition-all"
+                        >
+                          Clear All Filters
+                        </button>
+                      </div>
                     </td>
-                    <td className="px-8 py-5 font-bold text-deep-navy dark:text-white">{creator.name}</td>
-                    <td className="px-8 py-5 text-sm text-deep-navy dark:text-white/80">{creator.city}</td>
-                    <td className="px-8 py-5 text-sm">
-                      <span className="text-teal bg-teal/5 px-3 py-1 rounded-full font-medium text-xs border border-teal/10">{creator.niche}</span>
-                    </td>
-                    <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60">{creator.followers}</td>
-                    <td className="px-8 py-5 text-right font-serif text-xl font-bold italic">
-                      <span className={creator.score >= 80 ? 'text-teal' : creator.score >= 70 ? 'text-coral' : 'text-amber-600'}>
-                        {creator.score}
-                      </span>
-                    </td>
-                  </motion.tr>
-                ))}
+                  </tr>
+                ) : (
+                  filtered.map((creator, idx) => (
+                    <motion.tr 
+                      key={creator.id}
+                      layout
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={() => { window.location.hash = `#creator-profile?id=${creator.id}`; }}
+                      className="border-b border-border-warm dark:border-white/10 hover:bg-warm-beige/40 dark:hover:bg-white/5 transition-all cursor-pointer group/row"
+                    >
+                      <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60">
+                        {idx === 0 && selectedCity === 'All' && selectedNiche === 'All' && searchQuery === '' && (
+                          <span className="bg-coral text-white text-[10px] px-2 py-0.5 rounded mr-2">Top Pick</span>
+                        )}
+                        {idx + 1}
+                      </td>
+                      <td className="px-8 py-5 font-bold text-deep-navy dark:text-white group-hover/row:text-coral transition-colors flex items-center gap-1.5">
+                        <span>{creator.name}</span>
+                        <ArrowUpRight size={14} className="opacity-0 group-hover/row:opacity-100 transition-opacity text-coral shrink-0" />
+                      </td>
+                      <td className="px-8 py-5 text-sm text-deep-navy dark:text-white/80">{creator.city}</td>
+                      <td className="px-8 py-5 text-sm">
+                        <span className="text-teal bg-teal/5 px-3 py-1 rounded-full font-medium text-xs border border-teal/10">{creator.niche}</span>
+                      </td>
+                      <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60">{creator.followers}</td>
+                      <td className="px-8 py-5 text-right font-serif text-xl font-bold italic">
+                        <span className={creator.score >= 80 ? 'text-teal' : creator.score >= 70 ? 'text-coral' : 'text-amber-600'}>
+                          {creator.score}
+                        </span>
+                      </td>
+                    </motion.tr>
+                  ))
+                )}
               </AnimatePresence>
             </tbody>
           </table>
@@ -1440,8 +1769,9 @@ export default function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-      const cleanHash = hash.replace('#', '');
-      const validSubpages = ['sandbox', 'brief-generator', 'predictor', 'calculator', 'leaderboard', 'comparison', 'roi-estimator', 'niche-chart'];
+      const pathPart = hash.includes('?') ? hash.split('?')[0] : hash;
+      const cleanHash = pathPart.replace('#', '');
+      const validSubpages = ['sandbox', 'brief-generator', 'predictor', 'calculator', 'leaderboard', 'comparison', 'roi-estimator', 'niche-chart', 'creator-profile'];
       if (validSubpages.includes(cleanHash)) {
         setCurrentPage(cleanHash);
         window.scrollTo(0, 0); // Reset page scroll on load
@@ -1457,8 +1787,9 @@ export default function App() {
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    const targetId = href.replace('#', '');
-    const validSubpages = ['sandbox', 'brief-generator', 'predictor', 'calculator', 'leaderboard', 'comparison', 'roi-estimator', 'niche-chart'];
+    const baseHref = href.includes('?') ? href.split('?')[0] : href;
+    const targetId = baseHref.replace('#', '');
+    const validSubpages = ['sandbox', 'brief-generator', 'predictor', 'calculator', 'leaderboard', 'comparison', 'roi-estimator', 'niche-chart', 'creator-profile'];
     
     if (validSubpages.includes(targetId)) {
       window.location.hash = href;
@@ -1541,31 +1872,6 @@ export default function App() {
               </FadeInSection>
             </section>
 
-            {/* 4. Solution */}
-            <section id="scrag-solution" className="py-24 bg-surface border-y border-border-warm overflow-hidden">
-              <div className="max-w-7xl mx-auto px-6">
-                <FadeInSection>
-                  <SectionHeader label="THE SOLUTION" title="Introducing the AuraSearch Metric Engine" labelColor="text-teal" />
-                  <p className="text-center text-muted mb-16 max-w-2xl mx-auto mt-6 text-sm leading-relaxed">
-                    We don't find the most famous voice. We find the most believable one. Our engine scores 5 core dimensions that predict true regional influence.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                    {SCRAG_DIMENSIONS.map(dim => (
-                      <div key={dim.key} className="bg-white p-8 rounded-2xl border border-border-warm transition-all flex flex-col justify-between h-80">
-                        <div>
-                          <span className="font-serif text-5xl font-bold text-coral mb-4 block">{dim.key}</span>
-                          <h4 className="font-bold text-deep-navy mb-4">{dim.name}</h4>
-                        </div>
-                        <p className="text-xs text-muted leading-relaxed">
-                          {dim.desc}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </FadeInSection>
-              </div>
-            </section>
-
             {/* 5. How It Works Flow */}
             <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-6 font-sans">
               <FadeInSection>
@@ -1595,38 +1901,7 @@ export default function App() {
               }} 
             />
 
-            {/* 16. Comparison Table */}
-            <section id="pricing" className="py-24 bg-deep-navy/[0.02] dark:bg-[#060a13]/40 px-6 border-y border-border-warm dark:border-white/10">
-              <div className="max-w-5xl mx-auto">
-                <SectionHeader label="WHY SCRAG" title="A Fundamentally Different Approach" />
-                <div className="bg-white dark:bg-deep-navy/30 rounded-[24px] shadow-warm border border-border-warm dark:border-white/10 overflow-hidden">
-                   <table className="w-full text-left">
-                     <thead>
-                       <tr>
-                          <th className="p-8 text-xs font-black uppercase text-muted dark:text-white/40 tracking-widest bg-warm-beige/30 dark:bg-white/5 border-r border-border-warm dark:border-white/10">Metrics</th>
-                          <th className="p-8 text-lg font-serif font-bold bg-warm-beige/50 dark:bg-white/5 text-muted border-r border-border-warm dark:border-white/10">Traditional Marketing</th>
-                          <th className="p-8 text-lg font-serif font-bold bg-coral/5 text-deep-navy dark:text-coral">SCRAG Model</th>
-                       </tr>
-                     </thead>
-                     <tbody className="text-sm">
-                       {[
-                         { label: 'Creator Type', trad: 'Celebrity/Universal', scrag: 'Hyper-Local/Niche' },
-                         { label: 'Cost Basis', trad: 'Follower Count', scrag: 'Trust & Relevance Score' },
-                         { label: 'Content Fit', trad: 'Scripted/Forced', scrag: 'Contextual/Native' },
-                         { label: 'Decision Basis', trad: 'Lagging Historical Data', scrag: 'Real-time Sentiment Pulse' },
-                         { label: 'Campaign Timing', trad: 'Standard Scheduling', scrag: 'Peak Interest Windows' }
-                       ].map((row, i) => (
-                         <tr key={i} className="border-t border-border-warm dark:border-white/10">
-                           <td className="p-8 font-bold border-r border-border-warm dark:border-white/10 dark:text-white">{row.label}</td>
-                           <td className="p-8 text-muted border-r border-border-warm dark:border-white/10 dark:text-white/60">{row.trad}</td>
-                           <td className="p-8 font-bold text-deep-navy dark:text-coral border-l-[6px] border-l-teal/30">{row.scrag}</td>
-                         </tr>
-                       ))}
-                     </tbody>
-                   </table>
-                </div>
-              </div>
-            </section>
+
 
             {/* 17. For Creators */}
             <section id="creators" className="py-24 bg-[#F2F8F6] dark:bg-teal/5 px-6 border-b border-border-warm dark:border-teal/10">
@@ -1709,6 +1984,7 @@ export default function App() {
               {currentPage === 'roi-estimator' && <ROIEstimator />}
               {currentPage === 'niche-chart' && <NichePerformanceChart />}
               {currentPage === 'design-system' && <DesignSystemPage />}
+              {currentPage === 'creator-profile' && <CreatorProfile />}
             </SubPageLayout>
           </motion.div>
         )}
@@ -1732,8 +2008,6 @@ export default function App() {
               <h5 className="font-bold text-deep-navy dark:text-white mb-6">Company</h5>
               <ul className="space-y-4 text-sm text-muted">
                 <li><a href="#how-it-works" onClick={(e) => handleNavClick(e, '#how-it-works')} className="hover:text-coral transition-colors">How it Works</a></li>
-                <li><a href="#use-case" onClick={(e) => handleNavClick(e, '#use-case')} className="hover:text-coral transition-colors">Use Case</a></li>
-                <li><a href="#pricing" onClick={(e) => handleNavClick(e, '#pricing')} className="hover:text-coral transition-colors">Pricing</a></li>
               </ul>
             </div>
             
