@@ -11,6 +11,24 @@ const PORT = 3000;
 
 app.use(express.json());
 
+const cleanAndParseJSON = (text: string) => {
+  let cleaned = (text || "").trim();
+  // Strip any markdown codeblock indicators
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```(json)?\n?/, "");
+    cleaned = cleaned.replace(/\n?```$/, "");
+    cleaned = cleaned.trim();
+  }
+  try {
+    return JSON.parse(cleaned);
+  } catch (error: any) {
+    console.error("Failed to parse Gemini JSON directly:", cleaned, error);
+    // Attempt basic parsing cleanups if it failed, e.g., scrubbing trailing commas
+    cleaned = cleaned.replace(/,\s*([\]}])/g, "$1");
+    return JSON.parse(cleaned);
+  }
+};
+
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
   httpOptions: {
@@ -37,12 +55,12 @@ Write a hyper-local influencer campaign brief using SCRAG intelligence.`;
       model,
       contents: prompt,
       config: {
-        systemInstruction: "You are SCRAG's AI campaign strategist. You specialize in hyper-local influencer marketing for Indian regional brands. Respond ONLY in this JSON format with no markdown, no preamble:\n{\n  \"brief_title\": \"string\",\n  \"target_audience\": \"string\",\n  \"campaign_hook\": \"string\",\n  \"content_pillars\": [\"string\", \"string\", \"string\"],\n  \"content_formats\": [\"string\", \"string\"],\n  \"creator_profile\": \"string\",\n  \"best_posting_times\": [\"string\", \"string\"],\n  \"campaign_duration\": \"string\",\n  \"estimated_budget_range\": \"string\",\n  \"top_hashtags\": [\"string\",\"string\",\"string\",\"string\",\"string\"],\n  \"success_metrics\": [\"string\",\"string\",\"string\"],\n  \"pro_tip\": \"string\"\n}",
+        systemInstruction: "You are SCRAG's AI campaign strategist. You specialize in hyper-local influencer marketing for Indian regional brands. Respond ONLY in scientific, valid JSON format matching this schema with no markdown, no comments, and no preamble. Inside quotes, absolutely do NOT use unescaped double quotes; use single quotes instead. No trailing commas. Schema:\n{\n  \"brief_title\": \"string\",\n  \"target_audience\": \"string\",\n  \"campaign_hook\": \"string\",\n  \"content_pillars\": [\"string\", \"string\", \"string\"],\n  \"content_formats\": [\"string\", \"string\"],\n  \"creator_profile\": \"string\",\n  \"best_posting_times\": [\"string\", \"string\"],\n  \"campaign_duration\": \"string\",\n  \"estimated_budget_range\": \"string\",\n  \"top_hashtags\": [\"string\",\"string\",\"string\",\"string\",\"string\"],\n  \"success_metrics\": [\"string\",\"string\",\"string\"],\n  \"pro_tip\": \"string\"\n}",
         responseMimeType: "application/json",
       },
     });
 
-    res.json(JSON.parse(response.text || "{}"));
+    res.json(cleanAndParseJSON(response.text || "{}"));
   } catch (error: any) {
     console.error("Brief API Error:", error);
     res.status(500).json({ error: error.message });
@@ -68,12 +86,12 @@ Predict this influencer campaign's outcome with reasoning.`;
       model,
       contents: prompt,
       config: {
-        systemInstruction: "You are a campaign performance predictor for the SCRAG platform. Respond ONLY in JSON, no markdown, no explanation:\n{\n  \"success_probability\": number (0-100),\n  \"confidence_level\": \"High\" | \"Medium\" | \"Low\",\n  \"predicted_reach\": \"string (e.g. 45,000 – 62,000)\",\n  \"predicted_engagement_rate\": \"string (e.g. 6.2% – 8.4%)\",\n  \"predicted_conversions\": \"string\",\n  \"roi_estimate\": \"string (e.g. 3.2x – 4.8x)\",\n  \"risk_factors\": [\"string\", \"string\"],\n  \"success_factors\": [\"string\", \"string\"],\n  \"verdict\": \"string (2 sentences max)\",\n  \"recommendation\": \"string\"\n}",
+        systemInstruction: "You are a campaign performance predictor for the SCRAG platform. Respond ONLY in JSON, no markdown, no explanation. Inside quotes, absolutely do NOT use unescaped double quotes; use single quotes instead. Ensure NO trailing commas. Format:\n{\n  \"success_probability\": number (0-100),\n  \"confidence_level\": \"High\" | \"Medium\" | \"Low\",\n  \"predicted_reach\": \"string (e.g. 45,000 – 62,000)\",\n  \"predicted_engagement_rate\": \"string (e.g. 6.2% – 8.4%)\",\n  \"predicted_conversions\": \"string\",\n  \"roi_estimate\": \"string (e.g. 3.2x – 4.8x)\",\n  \"risk_factors\": [\"string\", \"string\"],\n  \"success_factors\": [\"string\", \"string\"],\n  \"verdict\": \"string (2 sentences max)\",\n  \"recommendation\": \"string\"\n}",
         responseMimeType: "application/json",
       },
     });
 
-    res.json(JSON.parse(response.text || "{}"));
+    res.json(cleanAndParseJSON(response.text || "{}"));
   } catch (error: any) {
     console.error("Predict API Error:", error);
     res.status(500).json({ error: error.message });
@@ -131,12 +149,12 @@ Build a day-by-day influencer campaign timeline.`;
       model,
       contents: prompt,
       config: {
-        systemInstruction: "You are a campaign timeline strategist for SCRAG. Respond ONLY in JSON:\n{\n  \"timeline\": [\n    {\n      \"day\": \"Day 1-2\",\n      \"phase\": \"string\",\n      \"action\": \"string\",\n      \"content_type\": \"string\",\n      \"platform\": \"string\",\n      \"goal\": \"string\"\n    }\n  ],\n  \"peak_day\": \"string\",\n  \"warm_up_tip\": \"string\",\n  \"scale_tip\": \"string\"\n}",
+        systemInstruction: "You are a campaign timeline strategist for SCRAG. Respond ONLY in JSON, with NO markdown formatting, NO trailing commas, and NO unescaped double-quotes inside string values (always use single quotes in text if needed). Format:\n{\n  \"timeline\": [\n    {\n      \"day\": \"Day 1-2\",\n      \"phase\": \"string\",\n      \"action\": \"string\",\n      \"content_type\": \"string\",\n      \"platform\": \"string\",\n      \"goal\": \"string\"\n    }\n  ],\n  \"peak_day\": \"string\",\n  \"warm_up_tip\": \"string\",\n  \"scale_tip\": \"string\"\n}",
         responseMimeType: "application/json",
       },
     });
 
-    res.json(JSON.parse(response.text || "{}"));
+    res.json(cleanAndParseJSON(response.text || "{}"));
   } catch (error: any) {
     console.error("Timeline API Error:", error);
     res.status(500).json({ error: error.message });
@@ -168,12 +186,12 @@ Perform a deep analysis of current regional growth patterns, hyper-local marketi
       model,
       contents: prompt,
       config: {
-        systemInstruction: "You are the SCRAG AI Regional Trend Forecaster. You analyze database matrices and real-time regional audience focus over selected timescales. Respond strictly in valid JSON format with no markdown wrappers or backticks. Format:\n{\n  \"trendMultiplier\": number (0.8 to 1.6 representing regional multiplier),\n  \"growthStatus\": \"Accelerating\" | \"Supercharged\" | \"Stable\" | \"Saturated\",\n  \"recommendedPlatform\": \"string\",\n  \"trendInsight\": \"string (1-2 sentences of professional local growth insight tailored specifically to the requested growth pattern period, showcasing understanding of search trends or local preferences over that timeframe)\"\n}",
+        systemInstruction: "You are the SCRAG AI Regional Trend Forecaster. You analyze database matrices and real-time regional audience focus over selected timescales. Respond strictly in valid JSON format with no markdown wrappers or backticks. Inside text strings, DO NOT use unescaped double quotes. Ensure NO trailing commas. Format:\n{\n  \"trendMultiplier\": number (0.8 to 1.6 representing regional multiplier),\n  \"growthStatus\": \"Accelerating\" | \"Supercharged\" | \"Stable\" | \"Saturated\",\n  \"recommendedPlatform\": \"string\",\n  \"trendInsight\": \"string (1-2 sentences of professional local growth insight tailored specifically to the requested growth pattern period, showcasing understanding of search trends or local preferences over that timeframe)\"\n}",
         responseMimeType: "application/json",
       },
     });
 
-    res.json(JSON.parse(response.text || "{}"));
+    res.json(cleanAndParseJSON(response.text || "{}"));
   } catch (error: any) {
     console.error("Analyze Trend API Error:", error);
     res.status(500).json({ error: error.message });

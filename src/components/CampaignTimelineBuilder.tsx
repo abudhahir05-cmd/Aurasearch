@@ -23,10 +23,13 @@ export const CampaignTimelineBuilder = () => {
         body: JSON.stringify(inputs)
       });
       const data = await response.json();
+      if (data.error || !data.timeline) {
+        throw new Error(data.error || 'Server did not return a valid campaign timeline structure.');
+      }
       setTimeline(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Timeline engine failed — try again');
+      alert(err.message || 'Timeline engine failed — try again');
     } finally {
       setLoading(false);
     }
@@ -115,7 +118,7 @@ export const CampaignTimelineBuilder = () => {
                  className="space-y-8"
                >
                  <div className="relative pl-8 space-y-12 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border-warm before:z-0">
-                    {timeline.timeline.map((item: any, i: number) => (
+                    {timeline.timeline?.map((item: any, i: number) => (
                       <motion.div 
                         key={i}
                         initial={{ opacity: 0, x: -10 }}

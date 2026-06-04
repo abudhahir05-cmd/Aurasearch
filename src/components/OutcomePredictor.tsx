@@ -23,10 +23,13 @@ export const OutcomePredictor = () => {
         body: JSON.stringify(inputs)
       });
       const data = await response.json();
+      if (data.error || typeof data.success_probability === 'undefined') {
+        throw new Error(data.error || 'Server did not return a valid campaign outcome prediction.');
+      }
       setPrediction(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Prediction engine failed — try again');
+      alert(err.message || 'Prediction engine failed — try again');
     } finally {
       setLoading(false);
     }
@@ -207,7 +210,7 @@ export const OutcomePredictor = () => {
                      <div className="space-y-3">
                         <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Risk Factors</span>
                         <div className="flex flex-wrap gap-2">
-                           {prediction.risk_factors.map((risk: string) => (
+                           {prediction.risk_factors?.map((risk: string) => (
                              <span key={risk} className="text-[10px] font-bold text-coral bg-coral/5 border border-coral/10 px-3 py-1.5 rounded-full flex items-center gap-1.5">
                                 <AlertCircle size={12}/> {risk}
                              </span>
@@ -217,7 +220,7 @@ export const OutcomePredictor = () => {
                      <div className="space-y-3">
                         <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Success Factors</span>
                         <div className="flex flex-wrap gap-2">
-                           {prediction.success_factors.map((success: string) => (
+                           {prediction.success_factors?.map((success: string) => (
                              <span key={success} className="text-[10px] font-bold text-teal bg-teal/5 border border-teal/10 px-3 py-1.5 rounded-full flex items-center gap-1.5">
                                 <CheckCircle size={12}/> {success}
                              </span>

@@ -23,10 +23,13 @@ export const AIBriefGenerator = () => {
         body: JSON.stringify(formData)
       });
       const data = await response.json();
+      if (data.error || !data.brief_title) {
+        throw new Error(data.error || 'AuraSearch AI did not return a valid campaign brief structure.');
+      }
       setBrief(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('AuraSearch AI is temporarily unavailable — try again');
+      alert(err.message || 'AuraSearch AI is temporarily unavailable — try again');
     } finally {
       setLoading(false);
     }
@@ -140,7 +143,7 @@ export const AIBriefGenerator = () => {
 
                 {/* Content Pillars */}
                 <div className="grid md:grid-cols-3 gap-4">
-                   {brief.content_pillars.map((pillar: string, i: number) => (
+                   {brief.content_pillars?.map((pillar: string, i: number) => (
                       <motion.div 
                         key={pillar}
                         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + (i * 0.1) }}
@@ -177,7 +180,7 @@ export const AIBriefGenerator = () => {
                   <div className="bg-deep-navy p-4 rounded-2xl md:col-span-2 text-white">
                     <div className="text-[10px] font-bold opacity-60 uppercase mb-2">Best Posting Times</div>
                     <div className="flex flex-wrap gap-2">
-                       {brief.best_posting_times.map((time: string) => <span key={time} className="text-[10px] bg-white/10 px-2 py-0.5 rounded">{time}</span>)}
+                       {brief.best_posting_times?.map((time: string) => <span key={time} className="text-[10px] bg-white/10 px-2 py-0.5 rounded">{time}</span>)}
                     </div>
                   </div>
                 </div>
@@ -185,10 +188,10 @@ export const AIBriefGenerator = () => {
                 {/* Hashtags & Metrics */}
                 <div className="space-y-6">
                    <div className="flex flex-wrap gap-2">
-                      {brief.top_hashtags.map((tag: string) => <span key={tag} className="text-xs font-bold text-coral bg-coral/5 px-3 py-1 rounded-full">{tag}</span>)}
+                      {brief.top_hashtags?.map((tag: string) => <span key={tag} className="text-xs font-bold text-coral bg-coral/5 px-3 py-1 rounded-full">{tag}</span>)}
                    </div>
                    <div className="grid md:grid-cols-3 gap-6">
-                      {brief.success_metrics.map((metric: string) => (
+                      {brief.success_metrics?.map((metric: string) => (
                         <div key={metric} className="flex items-center gap-2">
                            <CheckCircle size={16} className="text-teal shrink-0" />
                            <span className="text-xs font-bold text-deep-navy">{metric}</span>
