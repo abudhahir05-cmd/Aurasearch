@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, Clock, Sparkles, Loader2, ArrowRight, TrendingUp } from 'lucide-react';
+import { generateTimelineFallback } from '../lib/apiFallback';
 
 export const CampaignTimelineBuilder = () => {
   const [loading, setLoading] = useState(false);
@@ -22,11 +23,16 @@ export const CampaignTimelineBuilder = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(inputs)
       });
+      if (!response.ok) {
+        throw new Error(`Server returned status: ${response.status}`);
+      }
       const data = await response.json();
       setTimeline(data);
     } catch (err) {
-      console.error(err);
-      alert('Timeline engine failed — try again');
+      console.warn("API generate-timeline failed, falling back to local campaign simulator:", err);
+      // Generate realistic fallback timeline data directly client side!
+      const fallbackData = generateTimelineFallback(inputs.brand, inputs.city, inputs.niche, inputs.goal, inputs.duration);
+      setTimeline(fallbackData);
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Calculator, TrendingUp, Users, Target, Banknote, Percent, Info, Activity, Sparkles } from 'lucide-react';
 import { CREATORS_DATA } from '../creatorsData';
+import { analyzeTrendFallback } from '../lib/apiFallback';
 
 export const ROIEstimator = () => {
   const [inputs, setInputs] = useState({
@@ -69,7 +70,10 @@ export const ROIEstimator = () => {
       setTrendData(data);
       calculateROI(data);
     } catch (error) {
-      console.error('Error analyzing trend:', error);
+      console.warn('API /api/analyze-trend failed, falling back to local forecaster simulation:', error);
+      const fallbackData = analyzeTrendFallback(inputs.city, inputs.niche, range);
+      setTrendData(fallbackData);
+      calculateROI(fallbackData);
     } finally {
       setIsAnalyzing(false);
     }

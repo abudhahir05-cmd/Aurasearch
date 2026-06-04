@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Calendar, Target, Users, MapPin, Briefcase, TrendingUp, CheckCircle, Lightbulb, Loader2, Download, Play } from 'lucide-react';
+import { generateBriefFallback } from '../lib/apiFallback';
 
 export const AIBriefGenerator = () => {
   const [loading, setLoading] = useState(false);
@@ -22,11 +23,15 @@ export const AIBriefGenerator = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
+      if (!response.ok) {
+        throw new Error(`Server returned status: ${response.status}`);
+      }
       const data = await response.json();
       setBrief(data);
     } catch (err) {
-      console.error(err);
-      alert('AuraSearch AI is temporarily unavailable — try again');
+      console.warn("API generate-brief failed, falling back to local strategist generator:", err);
+      const fallbackData = generateBriefFallback(formData.brandName, formData.city, formData.category, formData.goal);
+      setBrief(fallbackData);
     } finally {
       setLoading(false);
     }

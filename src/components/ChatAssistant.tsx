@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Sparkles, Loader2, Bot } from 'lucide-react';
+import { chatFallback } from '../lib/apiFallback';
 
 const STARTER_PROMPTS = [
   "Recommend a food creator in Kochi",
@@ -221,11 +222,15 @@ export const ChatAssistant = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages })
       });
+      if (!response.ok) {
+        throw new Error(`Server returned status: ${response.status}`);
+      }
       const data = await response.json();
       setMessages([...newMessages, { role: 'assistant', content: data.text }]);
     } catch (err) {
-      console.error(err);
-      setMessages([...newMessages, { role: 'assistant', content: "Sorry, I'm having trouble connecting. Try again later!" }]);
+      console.warn("API /api/chat failed, falling back to local strategist chatbot:", err);
+      const fallbackReply = chatFallback(newMessages);
+      setMessages([...newMessages, { role: 'assistant', content: fallbackReply.text }]);
     } finally {
       setIsTyping(false);
     }

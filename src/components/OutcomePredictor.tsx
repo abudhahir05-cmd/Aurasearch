@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TrendingUp, Users, Target, Activity, AlertCircle, CheckCircle, Info, Loader2, Sparkles, RefreshCcw } from 'lucide-react';
+import { predictOutcomeFallback } from '../lib/apiFallback';
 
 export const OutcomePredictor = () => {
   const [loading, setLoading] = useState(false);
@@ -22,11 +23,15 @@ export const OutcomePredictor = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(inputs)
       });
+      if (!response.ok) {
+        throw new Error(`Server returned status: ${response.status}`);
+      }
       const data = await response.json();
       setPrediction(data);
     } catch (err) {
-      console.error(err);
-      alert('Prediction engine failed — try again');
+      console.warn("API predict-outcome failed, falling back to local simulation calculator:", err);
+      const fallbackData = predictOutcomeFallback(inputs.score, inputs.budget, inputs.platform, inputs.contentType, inputs.nicheMatch, inputs.tier);
+      setPrediction(fallbackData);
     } finally {
       setLoading(false);
     }
