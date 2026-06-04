@@ -29,14 +29,24 @@ const cleanAndParseJSON = (text: string) => {
   }
 };
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+let _ai: GoogleGenAI | null = null;
+const getAI = (): GoogleGenAI => {
+  if (!_ai) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is required. Please add it via Settings > Secrets in the dashboard.");
     }
+    _ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
   }
-});
+  return _ai;
+};
 
 // AI Campaign Brief Generator
 app.post("/api/generate-brief", async (req, res) => {
@@ -48,10 +58,10 @@ app.post("/api/generate-brief", async (req, res) => {
 City: ${city}
 Category: ${category}
 Goal: ${goal}
-
+ 
 Write a hyper-local influencer campaign brief using SCRAG intelligence.`;
 
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model,
       contents: prompt,
       config: {
@@ -79,10 +89,10 @@ Platform: ${platform}
 Content type: ${contentType}
 Niche match: ${nicheMatch}/20
 City tier: ${tier}
-
+ 
 Predict this influencer campaign's outcome with reasoning.`;
 
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model,
       contents: prompt,
       config: {
@@ -104,14 +114,14 @@ app.post("/api/chat", async (req, res) => {
     const { messages } = req.body;
     const model = "gemini-3.5-flash";
 
-    const chat = ai.chats.create({
+    const chat = getAI().chats.create({
       model,
       config: {
         systemInstruction: `You are SCRAG Assistant — an expert in regional creator search and hyper-local campaign optimization for Indian brands. You have access to structured insights across 8 regional hub cities: Coimbatore, Chennai, Bangalore, Mumbai, Delhi, Hyderabad, Kochi, and Pune.
-
+ 
 Niches available: Travel, Food, Tech, Fashion, Fitness, Comedy, Education, Beauty, Finance, Auto.
 SCRAG scores range from 0–100. Scores above 70 are considered strong campaign fits.
-
+ 
 CRITICAL FORMATTING INSTRUCTIONS:
 1. NEVER output massive block paragraphs.
 2. ALWAYS split your answers into structured, clear, and easy-to-read lists (either bullet points starting with '-' or numbered steps starting with '1.').
@@ -142,10 +152,10 @@ app.post("/api/generate-timeline", async (req, res) => {
     const model = "gemini-3.5-flash";
 
     const prompt = `Brand: ${brand}, City: ${city}, Niche: ${niche}, Goal: ${goal}, Duration: ${duration}
-
+ 
 Build a day-by-day influencer campaign timeline.`;
 
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model,
       contents: prompt,
       config: {
@@ -179,10 +189,10 @@ app.post("/api/analyze-trend", async (req, res) => {
     const prompt = `City: ${city}
 Niche: ${niche}
 Growth Period Scope: ${range} - ${rangeContext}
-
+ 
 Perform a deep analysis of current regional growth patterns, hyper-local marketing search trends, regional creator saturation, and local consumer sentiments for this niche in this specific Indian city for the specified timeframe. Reflect realistic regional dynamics (e.g., Coimbatore has high food/tech interest, Bangalore has extremely high tech/finance startup culture, Chennai has specific fashion/travel dynamics). Provide a realistic multiplier between 0.8 and 1.6 that our metrics engine should apply to campaign returns (ROI).`;
 
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model,
       contents: prompt,
       config: {

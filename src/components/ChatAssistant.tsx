@@ -221,11 +221,24 @@ export const ChatAssistant = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages })
       });
-      const data = await response.json();
-      setMessages([...newMessages, { role: 'assistant', content: data.text }]);
-    } catch (err) {
+      if (!response.ok) {
+        let errMsg = "Sorry, I'm having trouble connecting. Try again later!";
+        try {
+          const errData = await response.json();
+          errMsg = errData.error || errMsg;
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        throw new Error("Sorry, I received an invalid response. Please try again.");
+      }
+      setMessages([...newMessages, { role: 'assistant', content: data.text || "I couldn't generate a response." }]);
+    } catch (err: any) {
       console.error(err);
-      setMessages([...newMessages, { role: 'assistant', content: "Sorry, I'm having trouble connecting. Try again later!" }]);
+      setMessages([...newMessages, { role: 'assistant', content: err.message || "Sorry, I'm having trouble connecting. Try again later!" }]);
     } finally {
       setIsTyping(false);
     }

@@ -22,7 +22,20 @@ export const AIBriefGenerator = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      const data = await response.json();
+      if (!response.ok) {
+        let errMsg = 'AuraSearch AI is temporarily unavailable';
+        try {
+          const errData = await response.json();
+          errMsg = errData.error || errMsg;
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        throw new Error('Server returned an invalid response — please try again.');
+      }
       if (data.error || !data.brief_title) {
         throw new Error(data.error || 'AuraSearch AI did not return a valid campaign brief structure.');
       }

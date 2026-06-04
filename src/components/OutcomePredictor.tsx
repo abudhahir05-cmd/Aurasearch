@@ -22,7 +22,20 @@ export const OutcomePredictor = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(inputs)
       });
-      const data = await response.json();
+      if (!response.ok) {
+        let errMsg = 'Prediction engine is temporarily unavailable';
+        try {
+          const errData = await response.json();
+          errMsg = errData.error || errMsg;
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        throw new Error('Server returned an invalid response — please try again.');
+      }
       if (data.error || typeof data.success_probability === 'undefined') {
         throw new Error(data.error || 'Server did not return a valid campaign outcome prediction.');
       }
