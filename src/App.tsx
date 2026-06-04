@@ -73,6 +73,7 @@ import { CampaignTimelineBuilder } from './components/CampaignTimelineBuilder';
 import { DesignSystemPage } from './components/DesignSystemPage';
 import { EnterpriseDashboard } from './components/EnterpriseDashboard';
 import { CreatorProfile } from './components/CreatorProfile';
+import { ContactSection } from './components/ContactSection';
 import { CREATORS_DATA } from './creatorsData';
 const productLogo = '/src/assets/images/product_logo_1779731862866.png';
 
@@ -662,6 +663,13 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
               </div>
             </NavItem>
 
+            <NavItem
+              label="Contact"
+              active={isSectionActive(['contact'])}
+              hasDropdown={false}
+              onClick={(e) => onNavClick(e, '#contact')}
+            />
+
 
           </div>
 
@@ -753,6 +761,16 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
                   </AnimatePresence>
                 </div>
               ))}
+
+              <button 
+                onClick={(e) => {
+                  setIsMobileMenuOpen(false);
+                  onNavClick(e as any, '#contact');
+                }}
+                className="w-full text-left py-6 text-xl font-bold border-b border-white/5 hover:text-coral transition-all"
+              >
+                Contact Us
+              </button>
 
             </div>
 
@@ -2246,6 +2264,9 @@ export default function App() {
                 </div>
               </div>
             </section>
+
+            {/* 20. Contact Us */}
+            <ContactSection />
           </motion.main>
         ) : (
           <motion.div
@@ -2303,6 +2324,7 @@ export default function App() {
               <h5 className="font-bold text-deep-navy dark:text-white mb-6">Company</h5>
               <ul className="space-y-4 text-sm text-muted">
                 <li><a href="#how-it-works" onClick={(e) => handleNavClick(e, '#how-it-works')} className="hover:text-coral transition-colors">How it Works</a></li>
+                <li><a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:text-coral transition-colors">Contact Us</a></li>
               </ul>
             </div>
             
