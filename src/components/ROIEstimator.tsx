@@ -62,25 +62,14 @@ export const ROIEstimator = () => {
       });
       
       if (!response.ok) {
-        let errMsg = 'Failed to analyze trend';
-        try {
-          const errData = await response.json();
-          errMsg = errData.error || errMsg;
-        } catch (_) {}
-        throw new Error(errMsg);
+        throw new Error('Failed to analyze trend');
       }
       
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        throw new Error('Server returned an invalid response — please try again.');
-      }
+      const data = await response.json();
       setTrendData(data);
       calculateROI(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error analyzing trend:', error);
-      alert(error.message || 'Error executing intelligence trend request.');
     } finally {
       setIsAnalyzing(false);
     }

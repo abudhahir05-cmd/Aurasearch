@@ -22,27 +22,11 @@ export const CampaignTimelineBuilder = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(inputs)
       });
-      if (!response.ok) {
-        let errMsg = 'Timeline engine is temporarily unavailable';
-        try {
-          const errData = await response.json();
-          errMsg = errData.error || errMsg;
-        } catch (_) {}
-        throw new Error(errMsg);
-      }
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        throw new Error('Server returned an invalid response — please try again.');
-      }
-      if (data.error || !data.timeline) {
-        throw new Error(data.error || 'Server did not return a valid campaign timeline structure.');
-      }
+      const data = await response.json();
       setTimeline(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert(err.message || 'Timeline engine failed — try again');
+      alert('Timeline engine failed — try again');
     } finally {
       setLoading(false);
     }
@@ -131,7 +115,7 @@ export const CampaignTimelineBuilder = () => {
                  className="space-y-8"
                >
                  <div className="relative pl-8 space-y-12 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border-warm before:z-0">
-                    {timeline.timeline?.map((item: any, i: number) => (
+                    {timeline.timeline.map((item: any, i: number) => (
                       <motion.div 
                         key={i}
                         initial={{ opacity: 0, x: -10 }}

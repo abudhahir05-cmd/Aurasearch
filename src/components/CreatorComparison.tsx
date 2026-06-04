@@ -1,14 +1,52 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Trophy, TrendingUp, Users, Target, Activity, Zap, CheckCircle } from 'lucide-react';
 import { CREATORS_DATA, Creator } from '../creatorsData';
 
-export const CreatorComparison = () => {
+export const CreatorComparison = ({
+  initialCreatorAId = null,
+  initialCreatorBId = null,
+  onSelectA,
+  onSelectB,
+}: {
+  initialCreatorAId?: number | null;
+  initialCreatorBId?: number | null;
+  onSelectA?: (creator: Creator | null) => void;
+  onSelectB?: (creator: Creator | null) => void;
+} = {}) => {
   const [creatorA, setCreatorA] = useState<Creator | null>(null);
   const [creatorB, setCreatorB] = useState<Creator | null>(null);
   const [searchA, setSearchA] = useState('');
   const [searchB, setSearchB] = useState('');
   const [showResults, setShowResults] = useState(false);
+
+  useEffect(() => {
+    const foundA = CREATORS_DATA.find(c => c.id === initialCreatorAId) || null;
+    const foundB = CREATORS_DATA.find(c => c.id === initialCreatorBId) || null;
+    setCreatorA(foundA);
+    setCreatorB(foundB);
+    if (foundA && foundB) {
+      setShowResults(true);
+    } else {
+      setShowResults(false);
+    }
+  }, [initialCreatorAId, initialCreatorBId]);
+
+  const handleSelectA = (c: Creator | null) => {
+    setCreatorA(c);
+    if (onSelectA) onSelectA(c);
+    if (c === null || !creatorB) {
+      setShowResults(false);
+    }
+  };
+
+  const handleSelectB = (c: Creator | null) => {
+    setCreatorB(c);
+    if (onSelectB) onSelectB(c);
+    if (c === null || !creatorA) {
+      setShowResults(false);
+    }
+  };
 
   const filteredA = useMemo(() => 
     CREATORS_DATA.filter(c => c.name.toLowerCase().includes(searchA.toLowerCase())).slice(0, 5),
@@ -48,7 +86,7 @@ export const CreatorComparison = () => {
               <Search size={20} className="text-muted" />
               <input 
                 value={creatorA?.name || searchA}
-                onChange={e => { setSearchA(e.target.value); if (creatorA) setCreatorA(null); }}
+                onChange={e => { setSearchA(e.target.value); if (creatorA) handleSelectA(null); }}
                 placeholder="Select Creator A"
                 className="w-full bg-transparent focus:outline-none text-deep-navy font-bold"
               />
@@ -57,7 +95,7 @@ export const CreatorComparison = () => {
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-border-warm shadow-xl z-30 overflow-hidden">
                  {filteredA.map(c => (
                     <button 
-                      key={c.id} onClick={() => { setCreatorA(c); setSearchA(''); }}
+                      key={c.id} onClick={() => { handleSelectA(c); setSearchA(''); }}
                       className="w-full text-left p-4 hover:bg-warm-beige border-b border-border-warm last:border-none flex justify-between items-center"
                     >
                        <span className="font-bold text-sm">{c.name}</span>
@@ -74,7 +112,7 @@ export const CreatorComparison = () => {
               <Search size={20} className="text-muted" />
               <input 
                 value={creatorB?.name || searchB}
-                onChange={e => { setSearchB(e.target.value); if (creatorB) setCreatorB(null); }}
+                onChange={e => { setSearchB(e.target.value); if (creatorB) handleSelectB(null); }}
                 placeholder="Select Creator B"
                 className="w-full bg-transparent focus:outline-none text-deep-navy font-bold"
               />
@@ -83,7 +121,7 @@ export const CreatorComparison = () => {
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-border-warm shadow-xl z-30 overflow-hidden">
                  {filteredB.map(c => (
                     <button 
-                      key={c.id} onClick={() => { setCreatorB(c); setSearchB(''); }}
+                      key={c.id} onClick={() => { handleSelectB(c); setSearchB(''); }}
                       className="w-full text-left p-4 hover:bg-warm-beige border-b border-border-warm last:border-none flex justify-between items-center"
                     >
                        <span className="font-bold text-sm">{c.name}</span>

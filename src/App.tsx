@@ -8,13 +8,9 @@ import { motion, AnimatePresence, useInView } from 'motion/react';
 import { 
   Check, 
   X, 
-  Plus,
   ChevronRight, 
   Menu, 
   ArrowRight, 
-  LogOut,
-  LogIn,
-  User, 
   Star, 
   Users, 
   Target, 
@@ -76,7 +72,8 @@ import { CampaignTimelineBuilder } from './components/CampaignTimelineBuilder';
 import { DesignSystemPage } from './components/DesignSystemPage';
 import { EnterpriseDashboard } from './components/EnterpriseDashboard';
 import { CreatorProfile } from './components/CreatorProfile';
-import productLogo from './assets/images/product_logo_1779731862866.png';
+import { CREATORS_DATA } from './creatorsData';
+const productLogo = '/src/assets/images/product_logo_1779731862866.png';
 
 const LogoIcon = ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg', className?: string }) => {
   const sizeClasses = {
@@ -118,27 +115,18 @@ interface WaitlistForm {
 
 // --- Mock Data ---
 
-const CREATORS: Creator[] = [
-  { id: 1, name: "Karthik Krishnan", city: "Coimbatore", niche: "Travel", followers: "42K", score: 91 },
-  { id: 2, name: "Priya Nair", city: "Chennai", niche: "Food", followers: "28K", score: 87 },
-  { id: 3, name: "Ananya Reddy", city: "Bangalore", niche: "Fitness", followers: "61K", score: 84 },
-  { id: 4, name: "Rahul Menon", city: "Kochi", niche: "Comedy", followers: "19K", score: 79 },
-  { id: 5, name: "Deepa Iyer", city: "Mumbai", niche: "Fashion", followers: "35K", score: 73 },
-  { id: 6, name: "Vijay Kumar", city: "Hyderabad", niche: "Tech", followers: "22K", score: 68 },
-  { id: 7, name: "Suresh Pillai", city: "Kochi", niche: "Food", followers: "110K", score: 95 },
-  { id: 8, name: "Sneha Sen", city: "Delhi", niche: "Beauty", followers: "85K", score: 89 },
-  { id: 9, name: "Arjun Mehta", city: "Mumbai", niche: "Finance", followers: "55K", score: 82 },
-  { id: 10, name: "Aditi Rao", city: "Chennai", niche: "Fashion", followers: "72K", score: 81 },
-  { id: 11, name: "Vikram Seth", city: "Bangalore", niche: "Tech", followers: "120K", score: 90 },
-  { id: 12, name: "Meera Jasmine", city: "Coimbatore", niche: "Food", followers: "33K", score: 76 },
-  { id: 13, name: "Rohan Das", city: "Delhi", niche: "Comedy", followers: "94K", score: 85 },
-  { id: 14, name: "Kiran Bedi", city: "Hyderabad", niche: "Education", followers: "41K", score: 72 },
-  { id: 15, name: "Siddharth Roy", city: "Pune", niche: "Fitness", followers: "50K", score: 78 },
-  { id: 16, name: "Divya Spandana", city: "Bangalore", niche: "Travel", followers: "68K", score: 83 },
-  { id: 17, name: "Gautham Vasudev", city: "Chennai", niche: "Comedy", followers: "105K", score: 88 },
-  { id: 18, name: "Pooja Hegde", city: "Mumbai", niche: "Beauty", followers: "150K", score: 93 },
-  { id: 20, name: "Rajesh Koothrapali", city: "Pune", niche: "Tech", followers: "15K", score: 64 },
-];
+const CREATORS: Creator[] = CREATORS_DATA.map(c => ({
+  id: c.id,
+  name: c.name,
+  city: c.city,
+  niche: c.niche,
+  followers: c.followers >= 1000000 
+    ? `${(c.followers / 1000000).toFixed(1).replace(/\.0$/, '')}M` 
+    : c.followers >= 1000 
+      ? `${Math.round(c.followers / 1000)}K` 
+      : `${c.followers}`,
+  score: c.scragTotal
+}));
 
 const PROBLEM_CARDS = [
   {
@@ -370,7 +358,6 @@ const SubPageLayout = ({ pageId, children, onBack }: { pageId: string, children:
 };
 
 const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => void, onNavClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void, currentPage: string }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -679,36 +666,12 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
 
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            {isLoggedIn ? (
-              <div className="flex items-center gap-3">
-                <div className="hidden md:flex items-center gap-2 bg-warm-beige dark:bg-white/5 border border-border-warm dark:border-white/10 px-3 py-1.5 rounded-[12px]">
-                  <div className="w-6 h-6 rounded-full bg-coral text-white font-extrabold text-[10px] flex items-center justify-center shadow-sm uppercase">
-                    H
-                  </div>
-                  <div className="flex flex-col text-left leading-none">
-                    <span className="text-[9px] font-black tracking-wider uppercase text-muted">Aura Workspace</span>
-                    <span className="text-[10px] font-bold text-deep-navy dark:text-white truncate max-w-[130px]" title="hitman237560@gmail.com">
-                      hitman237560@gmail.com
-                    </span>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setIsLoggedIn(false)}
-                  className="bg-deep-navy/5 dark:bg-white/5 text-deep-navy dark:text-white border border-border-warm dark:border-white/10 py-2.5 rounded-[12px] hover:text-coral hover:bg-coral/5 hover:border-coral/40 dark:hover:text-coral dark:hover:bg-coral/10 transition-all flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-4"
-                  title="Logout Session"
-                >
-                  <LogOut size={13} />
-                  <span>Logout</span>
-                </button>
-              </div>
-            ) : (
-              <button 
-                onClick={() => setIsLoggedIn(true)}
-                className="bg-coral text-white text-xs font-black uppercase tracking-widest px-6 py-3.5 rounded-[12px] shadow-warm hover:-translate-y-0.5 hover:shadow-warm-hover active:translate-y-0 transition-all cursor-pointer"
-              >
-                Log In
-              </button>
-            )}
+            <button 
+              onClick={onOpenModal}
+              className="hidden sm:block bg-coral text-white text-xs font-black uppercase tracking-widest px-6 py-3.5 rounded-[12px] shadow-warm hover:-translate-y-0.5 hover:shadow-warm-hover active:translate-y-0 transition-all"
+            >
+              Get Early Access
+            </button>
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden p-2 text-deep-navy dark:text-white rounded-lg bg-warm-beige dark:bg-white/5 border border-border-warm dark:border-white/10"
@@ -740,49 +703,6 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
               >
                 <X size={24} />
               </button>
-            </div>
-
-            {/* Mobile/Tablet/Other Device Session Profile & Logout Action */}
-            <div className="mb-6 p-5 rounded-2xl bg-white/5 border border-white/10 select-none">
-              {isLoggedIn ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-coral text-white font-extrabold flex items-center justify-center shadow-lg text-sm select-none">
-                      H
-                    </div>
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[9px] font-black tracking-widest uppercase text-coral">Enterprise Session Active</span>
-                      <span className="text-sm font-bold text-white mt-1 truncate max-w-[220px]" title="hitman237560@gmail.com">
-                        hitman237560@gmail.com
-                      </span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      setIsLoggedIn(false);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-black uppercase tracking-widest py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs cursor-pointer text-center"
-                  >
-                    <LogOut size={14} />
-                    Logout Session
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  <p className="text-xs text-white/50 leading-relaxed font-medium">You are currently viewing as Guest. Log in to activate administrative controls.</p>
-                  <button 
-                    onClick={() => {
-                      setIsLoggedIn(true);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-teal text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs cursor-pointer text-center"
-                  >
-                    <LogIn size={14} />
-                    Log In
-                  </button>
-                </div>
-              )}
             </div>
 
             <div className="space-y-2 flex-grow">
@@ -836,14 +756,12 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
             </div>
 
             <div className="mt-12 space-y-6 pt-12 border-t border-white/5">
-              {!isLoggedIn && (
-                <button 
-                  onClick={() => { setIsMobileMenuOpen(false); onOpenModal(); }}
-                  className="w-full bg-coral text-white font-black uppercase tracking-widest py-5 rounded-2xl shadow-xl hover:-translate-y-1 transition-all"
-                >
-                  Get Early Access
-                </button>
-              )}
+              <button 
+                onClick={() => { setIsMobileMenuOpen(false); onOpenModal(); }}
+                className="w-full bg-coral text-white font-black uppercase tracking-widest py-5 rounded-2xl shadow-xl hover:-translate-y-1 transition-all"
+              >
+                Get Early Access
+              </button>
               <div className="flex justify-center">
                 <ThemeToggle />
               </div>
@@ -992,345 +910,7 @@ const StatCounter: React.FC<{ target: number, label: string, suffix: string }> =
   );
 };
 
-const getCampaignSimulation = (creator: Creator) => {
-  const campaignName = `${creator.name} Selection`;
-  let brandName = "Brand Partner";
-  let targetTopic = "Campaign Topic";
-  let findings = [
-    `Local relevance in ${creator.city} detected`,
-    `Matches interests in ${creator.niche}`,
-    `Trust index score at ${creator.score}%`,
-    `Optimal engagement timing predicted`
-  ];
-  let outputs = [
-    { label: "Creator name", value: creator.name },
-    { label: "Dynamic Hook", value: `"Authentic ${creator.niche} sharing in ${creator.city}"` },
-    { label: "Format", value: "Dedicated Video + Reel Integration" },
-    { label: "City Dialect Coverage", value: `${creator.city} local dialect` }
-  ];
-
-  if (creator.niche === 'Travel') {
-    brandName = "IndiGo regional flight promo / local tourism";
-    targetTopic = `Discovering Hidden Gems in ${creator.city}`;
-    findings = [
-      `Local weekend travelers in ${creator.city} highly active`,
-      `Audience looking for transit options & getaways`,
-      `Optimal posting hours: Fridays at 5:00 PM`,
-      `High-fidelity reach verified: ${creator.followers} audience`
-    ];
-    outputs = [
-      { label: "Campaign Anchor", value: creator.name },
-      { label: "Content Hook", value: `"Planning a city escape from ${creator.city}? Check this out 🎒"` },
-      { label: "Creative Asset", value: "1x IG Vlog + 2x interactive stories" },
-      { label: "Target Audience", value: `Tier-2 regional commuters from ${creator.city}` }
-    ];
-  } else if (creator.niche === 'Food') {
-    brandName = "Zomato regional / local brand partner";
-    targetTopic = `Street food review & local culinary guide`;
-    findings = [
-      `Extreme engagement on regional food reels in ${creator.city}`,
-      `High trust rating (${creator.score}/100) on local café mentions`,
-      `Comment sentiment: 94% positive and receptive`,
-      `Audience size: ${creator.followers} high-intent foodies`
-    ];
-    outputs = [
-      { label: "Campaign Anchor", value: creator.name },
-      { label: "Content Hook", value: `"Is this really the best parotta place in ${creator.city}? let's test! 🍲"` },
-      { label: "Creative Asset", value: "1x detailed review reel + location pin" },
-      { label: "Dialect Focus", value: `Regional conversational dialect of ${creator.city}` }
-    ];
-  } else if (creator.niche === 'Fitness') {
-    brandName = "Cult.fit home workout / regional health";
-    targetTopic = `Daily lifestyle & fitness goals`;
-    findings = [
-      `Micro-communities in ${creator.city} tracking active routines`,
-      `Sentiment maps point to high trust in home routine tips`,
-      `Engagement rate is ${((creator.score * 0.12)).toFixed(1)}% (above niche median)`,
-      `Strongest demographic: 18-34 years in ${creator.city}`
-    ];
-    outputs = [
-      { label: "Campaign Anchor", value: creator.name },
-      { label: "Content Hook", value: `"No gym? No problem! Try my daily home workout in ${creator.city} 💪"` },
-      { label: "Creative Asset", value: "30-day challenge series reels" },
-      { label: "Est. CPM / CPA", value: "Optimized regional cost-per-acquisition" }
-    ];
-  } else if (creator.niche === 'Tech') {
-    brandName = "Xiaomi regional launch / local retail launch";
-    targetTopic = `Unboxing & local context device review`;
-    findings = [
-      `Tech audience density in ${creator.city} searching for regional reviews`,
-      `Trust score (${creator.score}/100) ensures zero skepticism on sponsorships`,
-      `Direct replies show high intent for product pricing in ${creator.city}`,
-      `Verified local hub followers: ${creator.followers}`
-    ];
-    outputs = [
-      { label: "Campaign Anchor", value: creator.name },
-      { label: "Content Hook", value: `"Worth the upgrade? Local store testing in ${creator.city}! 📱"` },
-      { label: "Creative Asset", value: "Unboxing carousel + tech specs rundown" },
-      { label: "Regional Ingress", value: "Direct map directions link to regional retail hubs" }
-    ];
-  } else {
-    brandName = `AuraSearch Verified Regional Push`;
-    targetTopic = `Lifestyle Integration Campaign`;
-    findings = [
-      `Audience density detected in ${creator.city} watching ${creator.niche} content`,
-      `High local resonance verified via sentiment audit`,
-      `Peak conversation windows verified for ${creator.city} timezone`,
-      `Trust Score of ${creator.score} ensures high engagement rates`
-    ];
-    outputs = [
-      { label: "Campaign Anchor", value: creator.name },
-      { label: "Content Hook", value: `"My honest take on daily life here in ${creator.city}! ✨"` },
-      { label: "Creative Asset", value: "Creative Reel with dynamic transition + Q&A" },
-      { label: "Demographic Match", value: `Verified local high-affinity users` }
-    ];
-  }
-
-  return { campaignName, brandName, targetTopic, findings, outputs };
-};
-
-const GroupSimulationContainer = ({ 
-  simulatedCreators = [],
-  onResetSimulation
-}: { 
-  simulatedCreators: Creator[];
-  onResetSimulation?: () => void;
-}) => {
-  const [isRunning, setIsRunning] = useState(true);
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    setIsRunning(true);
-    setStep(0);
-    const interval = setInterval(() => {
-      setStep(prev => {
-        if (prev >= 4) {
-          clearInterval(interval);
-          setIsRunning(false);
-          return 4;
-        }
-        return prev + 1;
-      });
-    }, 850);
-    return () => clearInterval(interval);
-  }, [simulatedCreators]);
-
-  const triggerResetSimulation = () => {
-    setIsRunning(true);
-    setStep(0);
-    const interval = setInterval(() => {
-      setStep(prev => {
-        if (prev >= 4) {
-          clearInterval(interval);
-          setIsRunning(false);
-          return 4;
-        }
-        return prev + 1;
-      });
-    }, 850);
-  };
-
-  const stats = useMemo(() => {
-    const totalFollowersNum = simulatedCreators.reduce((acc, c) => {
-      const multiplier = c.followers.toLowerCase().includes('m') ? 1000000 : c.followers.toLowerCase().includes('k') ? 1000 : 1;
-      const numeric = parseFloat(c.followers.replace(/[kKmM]/g, ''));
-      return acc + (numeric * multiplier);
-    }, 0);
-
-    const totalFollowersFormatted = totalFollowersNum >= 1000000 
-      ? `${(totalFollowersNum / 1000000).toFixed(1)}M` 
-      : `${Math.round(totalFollowersNum / 1000)}K`;
-
-    const avgScore = Math.round(simulatedCreators.reduce((acc, c) => acc + c.score, 0) / simulatedCreators.length);
-
-    const projectedImpressions = Math.round(totalFollowersNum * 1.85);
-    const impressionsFormatted = projectedImpressions >= 1000000 
-      ? `${(projectedImpressions / 1000000).toFixed(2)}M` 
-      : `${Math.round(projectedImpressions / 1000)}K`;
-
-    return {
-      totalFollowers: totalFollowersFormatted,
-      avgScore,
-      projectedImpressions: impressionsFormatted
-    };
-  }, [simulatedCreators]);
-
-  return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Simulation Master Control & Stats Header */}
-      <div className="bg-gradient-to-br from-deep-navy via-[#12233c] to-deep-navy text-white rounded-[24px] border border-border-warm dark:border-white/10 p-8 shadow-xl overflow-hidden relative">
-        <div className="absolute inset-x-0 bottom-0 top-0 bg-[radial-gradient(circle_at_right_top,rgba(255,107,107,0.06),transparent_40%)] pointer-events-none" />
-        
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`w-2.5 h-2.5 rounded-full ${isRunning ? 'bg-orange-500 animate-pulse' : 'bg-teal'}`} />
-              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-coral">Group Campaign Simulation Suite</span>
-            </div>
-            <h3 className="font-serif text-2xl lg:text-3xl font-black text-white leading-tight">
-              {isRunning ? 'Synthesizing Combined Audience Models...' : 'Campaign Simulation Analysis Ready'}
-            </h3>
-            <p className="text-white/60 text-xs mt-1.5 max-w-xl">
-              Parallel evaluation of {simulatedCreators.length} regional creators across specific local dialect clusters & niche categories.
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              onClick={() => {
-                if (onResetSimulation) onResetSimulation();
-                window.location.hash = '#leaderboard';
-              }}
-              className="text-xs font-bold text-white/80 bg-white/5 hover:bg-white/10 transition-all border border-white/10 px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
-            >
-              ← Back to Leaderboard
-            </button>
-            <button
-              onClick={triggerResetSimulation}
-              disabled={isRunning}
-              className="text-xs font-black uppercase tracking-widest text-white bg-coral hover:bg-coral/90 transition-all px-5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-warm disabled:opacity-50 cursor-pointer"
-            >
-              <Zap size={13} className={isRunning ? 'animate-bounce' : ''} />
-              {isRunning ? 'Simulating...' : 'Rerun Simulation'}
-            </button>
-          </div>
-        </div>
-
-        {/* Sync Progress Bar */}
-        <div className="mt-8 relative z-10 bg-white/5 border border-white/15 p-2.5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="font-mono text-[10px] font-bold text-white/50 tracking-wider">PROG: [STEP 0{step}/04]</div>
-          <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-            <motion.div 
-              className="h-full bg-gradient-to-r from-coral to-teal"
-              initial={{ width: '0%' }}
-              animate={{ width: `${(step / 4) * 100}%` }}
-              transition={{ ease: "easeInOut", duration: 0.5 }}
-            />
-          </div>
-          <div className="text-[10px] font-black uppercase tracking-widest text-teal font-mono">
-            {step === 0 && 'Initializing Regional Sentiment Nodes...'}
-            {step === 1 && 'Scanning Local Dialect Patterns...'}
-            {step === 2 && 'Auditing Comment Section Authority...'}
-            {step === 3 && 'Generating Brand Sync Creative Briefs...'}
-            {step === 4 && 'Simulation Complete! Displays Active'}
-          </div>
-        </div>
-
-        {/* Collective Stats Dashboard */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8 pt-8 border-t border-white/10 relative z-10">
-          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
-            <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Combined Followers Reach</div>
-            <div className="text-2xl font-black text-white tracking-tight">{stats.totalFollowers}</div>
-          </div>
-          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
-            <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Average SCRAG Score</div>
-            <div className="text-2xl font-black text-teal tracking-tight">{stats.avgScore} / 100</div>
-          </div>
-          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
-            <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Simulated Joint Impressions</div>
-            <div className="text-2xl font-black text-coral tracking-tight">~{stats.projectedImpressions}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid of Simulated Creators */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {simulatedCreators.map(creator => {
-          const sim = getCampaignSimulation(creator);
-          return (
-            <motion.div 
-              key={creator.id}
-              layout
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-deep-navy/30 rounded-[20.5px] border border-border-warm dark:border-white/10 shadow-sm overflow-hidden"
-            >
-              {/* Card top banner with branding and region */}
-              <div className="bg-warm-beige/35 dark:bg-white/5 px-6 py-4.5 border-b border-border-warm dark:border-white/10 flex items-center justify-between gap-4">
-                <div className="flex flex-col leading-tight">
-                  <span className="text-[9px] font-black tracking-widest text-muted dark:text-white/40 uppercase">Creator Node Simulation</span>
-                  <span className="text-sm font-bold text-deep-navy dark:text-white mt-0.5">{creator.name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-teal/10 border border-teal/15 text-teal px-2.5 py-1 rounded-full">{creator.city}</span>
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-coral/10 border border-coral/15 text-coral px-2.5 py-1 rounded-full">{creator.niche}</span>
-                </div>
-              </div>
-
-              {/* Grid content inside the simulated card */}
-              <div className="grid md:grid-cols-1 gap-0">
-                {/* Findings block */}
-                <div className="p-6 border-b border-border-warm dark:border-white/10">
-                  <h4 className="text-deep-navy dark:text-white font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-1.5">
-                    <Activity size={13} className="text-teal" /> Dialect & Local Findings
-                  </h4>
-                  <ul className="space-y-3">
-                    {sim.findings.map((item, i) => (
-                      <motion.li 
-                        key={i}
-                        initial={{ opacity: 0, x: -6 }}
-                        animate={step > 0 ? { opacity: 1, x: 0 } : { opacity: 0 }}
-                        className="flex items-start gap-2 text-xs"
-                      >
-                        <Check size={13} className="text-teal mt-0.5 shrink-0" />
-                        <span className="text-muted dark:text-white/60 leading-relaxed font-semibold">{item}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Campaign Outputs block */}
-                <div className="p-6 bg-warm-beige/10 dark:bg-white/5">
-                  <h4 className="text-deep-navy dark:text-white font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-1.5">
-                    <Zap size={13} className="text-coral" /> Campaign Output Specs
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    {sim.outputs.map((out, i) => (
-                      <motion.div 
-                        key={i}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={step > 2 ? { opacity: 1, y: 0 } : { opacity: 0 }}
-                        className="flex flex-col"
-                      >
-                        <div className="text-[9px] font-bold text-muted dark:text-white/30 uppercase tracking-wider mb-0.5">{out.label}</div>
-                        <div className="text-deep-navy dark:text-white text-xs font-bold leading-tight">{out.value}</div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Completeness message footer */}
-              {step === 4 && (
-                <motion.div 
-                  initial={{ height: 0 }}
-                  animate={{ height: 'auto' }}
-                  className="bg-teal/10 border-t border-border-warm dark:border-white/10 p-4 text-center"
-                >
-                  <div className="text-teal font-serif text-xs font-bold flex items-center justify-center gap-1.5">
-                    <span>Campaign Fit Verified</span>
-                    <Sparkles size={11} className="text-teal animate-pulse" />
-                    <span>Score: {creator.score}/100</span>
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-const Sandbox = ({ 
-  isSubpage = false, 
-  simulatedCreators = [],
-  onResetSimulation
-}: { 
-  isSubpage?: boolean;
-  simulatedCreators?: Creator[];
-  onResetSimulation?: () => void;
-}) => {
+const Sandbox = ({ isSubpage = false }: { isSubpage?: boolean }) => {
   const [activeTab, setActiveTab] = useState<'simulation' | 'timeline'>('simulation');
 
   useEffect(() => {
@@ -1369,14 +949,7 @@ const Sandbox = ({
       <AnimatePresence mode="wait">
          {activeTab === 'simulation' ? (
             <motion.div key="simulation" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-               {simulatedCreators && simulatedCreators.length > 0 ? (
-                 <GroupSimulationContainer 
-                    simulatedCreators={simulatedCreators} 
-                    onResetSimulation={onResetSimulation}
-                 />
-               ) : (
-                 <SimulationCardContent />
-               )}
+               <SimulationCardContent />
             </motion.div>
          ) : (
             <motion.div key="timeline" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
@@ -1662,14 +1235,14 @@ const Sparkline = ({ creatorId, score }: { creatorId: number, score: number }) =
 
 const Leaderboard = ({ 
   isSubpage = false,
-  selectedCreatorIds = [],
-  setSelectedCreatorIds = () => {},
-  onAddToSandbox = () => {}
+  compareAId = null,
+  compareBId = null,
+  onToggleCompare
 }: { 
   isSubpage?: boolean;
-  selectedCreatorIds?: number[];
-  setSelectedCreatorIds?: React.Dispatch<React.SetStateAction<number[]>>;
-  onAddToSandbox?: (ids: number[]) => void;
+  compareAId?: number | null;
+  compareBId?: number | null;
+  onToggleCompare?: (id: number) => void;
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('All');
@@ -1989,18 +1562,7 @@ const Leaderboard = ({
             <h4 className="font-serif text-base font-bold text-deep-navy dark:text-white">Audited Leaderboard Records</h4>
           </div>
           
-          <div className="flex flex-wrap items-center gap-2.5">
-            {selectedCreatorIds.length > 0 && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                onClick={() => onAddToSandbox(selectedCreatorIds)}
-                title="Send selected creators to campaign simulation sandbox"
-                className="text-xs font-black uppercase tracking-wider text-white bg-teal hover:bg-teal/90 transition-all px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer hover:shadow-lg"
-              >
-                <Plus size={13} /> Add {selectedCreatorIds.length} Selected to Sandbox
-              </motion.button>
-            )}
+          <div className="flex items-center gap-2.5">
             <button
               onClick={exportToCSV}
               id="export-csv-btn"
@@ -2023,30 +1585,15 @@ const Leaderboard = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left min-w-[950px] block">
             <thead className="block">
-              <tr className="border-b border-border-warm dark:border-white/10 bg-warm-beige/30 dark:bg-white/5 grid grid-cols-[60px_100px_1.5fr_1fr_1.1fr_1.1fr_1.5fr_0.8fr] items-center">
-                <th className="px-6 py-5 flex items-center justify-center">
-                  <input
-                    type="checkbox"
-                    checked={filtered.length > 0 && filtered.every(c => selectedCreatorIds.includes(c.id))}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        const allFilteredIds = filtered.map(c => c.id);
-                        setSelectedCreatorIds(prev => Array.from(new Set([...prev, ...allFilteredIds])));
-                      } else {
-                        const allFilteredIds = filtered.map(c => c.id);
-                        setSelectedCreatorIds(prev => prev.filter(id => !allFilteredIds.includes(id)));
-                      }
-                    }}
-                    className="w-4.5 h-4.5 rounded border-border-warm text-coral focus:ring-coral cursor-pointer accent-coral bg-white dark:bg-deep-navy/30"
-                  />
-                </th>
-                <th className="px-4 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Rank</th>
+              <tr className="border-b border-border-warm dark:border-white/10 bg-warm-beige/30 dark:bg-white/5 grid grid-cols-[110px_1.4fr_0.9fr_0.9fr_0.9fr_1.4fr_0.7fr_1.1fr] items-center">
+                <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Rank</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Name</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">City</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Niche</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Followers</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Growth Trend</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest text-right">SCRAG Score</th>
+                <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest text-center">Compare</th>
               </tr>
             </thead>
             <tbody className="block">
@@ -2087,29 +1634,18 @@ const Leaderboard = ({
                         opacity: { duration: 0.2 }
                       }}
                       onClick={() => { window.location.hash = `#creator-profile?id=${creator.id}`; }}
-                      className={`border-b transition-all cursor-pointer group/row table-row-element grid grid-cols-[60px_100px_1.5fr_1fr_1.1fr_1.1fr_1.5fr_0.8fr] items-center ${
+                      className={`border-b transition-all cursor-pointer group/row table-row-element grid grid-cols-[110px_1.4fr_0.9fr_0.9fr_0.9fr_1.4fr_0.7fr_1.1fr] items-center ${
                         idx === 0
                           ? 'border-amber-400 bg-amber-500/5 dark:bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:bg-amber-500/10 dark:hover:bg-amber-500/15'
                           : 'border-border-warm dark:border-white/10 hover:bg-warm-beige/40 dark:hover:bg-white/5'
                       }`}
                     >
-                      <td className="px-6 py-5 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={selectedCreatorIds.includes(creator.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedCreatorIds(prev => [...prev, creator.id]);
-                            } else {
-                              setSelectedCreatorIds(prev => prev.filter(id => id !== creator.id));
-                            }
-                          }}
-                          className="w-4.5 h-4.5 rounded border-border-warm text-coral focus:ring-coral cursor-pointer accent-coral bg-white dark:bg-deep-navy/30"
-                        />
-                      </td>
-                      <td className="px-4 py-5 text-sm font-bold text-muted dark:text-white/60">
+                      <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60 flex items-center">
                         {idx === 0 ? (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="bg-gradient-to-r from-amber-500 to-amber-400 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-[0_2px_8px_rgba(245,158,11,0.25)] border border-amber-300/60 flex items-center gap-1 shrink-0 animate-pulse">
+                              👑 Top Creator
+                            </span>
                             <span className="text-amber-600 dark:text-amber-400 font-extrabold text-base">#{idx + 1}</span>
                           </div>
                         ) : (
@@ -2142,6 +1678,28 @@ const Leaderboard = ({
                         <span className={creator.score >= 80 ? 'text-teal' : creator.score >= 70 ? 'text-coral' : 'text-amber-600'}>
                           {creator.score}
                         </span>
+                      </td>
+                      <td className="px-8 py-5 flex justify-center">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onToggleCompare) onToggleCompare(creator.id);
+                          }}
+                          className={`px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all flex items-center gap-1 whitespace-nowrap leading-none border select-none ${
+                            (compareAId === creator.id || compareBId === creator.id)
+                              ? 'bg-teal border-teal text-white shadow-md shadow-teal/20'
+                              : 'bg-warm-beige/80 dark:bg-white/10 text-deep-navy dark:text-white border-border-warm dark:border-white/15 hover:bg-coral hover:text-white hover:border-coral'
+                          }`}
+                        >
+                          {(compareAId === creator.id || compareBId === creator.id) ? (
+                            <>
+                              <Check size={12} className="shrink-0" />
+                              <span>Comparing</span>
+                            </>
+                          ) : (
+                            <span>+ Compare</span>
+                          )}
+                        </button>
                       </td>
                     </motion.tr>
                   ))
@@ -2301,8 +1859,24 @@ const FadeInSection = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<'home' | string>('home');
-  const [selectedCreatorIds, setSelectedCreatorIds] = useState<number[]>([]);
-  const [simulatedCreators, setSimulatedCreators] = useState<Creator[]>([]);
+  const [compareAId, setCompareAId] = useState<number | null>(null);
+  const [compareBId, setCompareBId] = useState<number | null>(null);
+
+  const handleToggleCompare = (id: number) => {
+    if (compareAId === id) {
+      setCompareAId(null);
+    } else if (compareBId === id) {
+      setCompareBId(null);
+    } else {
+      if (!compareAId) {
+        setCompareAId(id);
+      } else if (!compareBId) {
+        setCompareBId(id);
+      } else {
+        setCompareBId(id);
+      }
+    }
+  };
 
   const openWaitlist = () => setIsWaitlistOpen(true);
 
@@ -2433,16 +2007,6 @@ export default function App() {
                 </div>
               </FadeInSection>
             </section>
-
-            {/* 6. Advanced Platform Tools Suite */}
-            <PlatformToolsOverview 
-              onLaunchTool={(toolId) => {
-                window.location.hash = `#${toolId}`;
-              }} 
-            />
-
-
-
             {/* 17. For Creators */}
             <section id="creators" className="py-24 bg-[#F2F8F6] dark:bg-teal/5 px-6 border-b border-border-warm dark:border-teal/10">
               <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
@@ -2515,30 +2079,26 @@ export default function App() {
             transition={{ duration: 0.4 }}
           >
             <SubPageLayout pageId={currentPage} onBack={() => { window.location.hash = '#home'; }}>
-              {currentPage === 'sandbox' && (
-                <Sandbox 
-                  isSubpage={true} 
-                  simulatedCreators={simulatedCreators}
-                  onResetSimulation={() => setSimulatedCreators([])}
-                />
-              )}
+              {currentPage === 'sandbox' && <Sandbox isSubpage={true} />}
               {currentPage === 'brief-generator' && <AIBriefGenerator />}
               {currentPage === 'predictor' && <OutcomePredictor />}
               {currentPage === 'calculator' && <ScragCalculator isSubpage={true} />}
               {currentPage === 'leaderboard' && (
                 <Leaderboard 
                   isSubpage={true} 
-                  selectedCreatorIds={selectedCreatorIds}
-                  setSelectedCreatorIds={setSelectedCreatorIds}
-                  onAddToSandbox={(ids) => {
-                    const selected = CREATORS.filter(c => ids.includes(c.id));
-                    setSimulatedCreators(selected);
-                    setCurrentPage('sandbox');
-                    window.location.hash = '#sandbox';
-                  }}
+                  compareAId={compareAId} 
+                  compareBId={compareBId} 
+                  onToggleCompare={handleToggleCompare} 
                 />
               )}
-              {currentPage === 'comparison' && <CreatorComparison />}
+              {currentPage === 'comparison' && (
+                <CreatorComparison 
+                  initialCreatorAId={compareAId}
+                  initialCreatorBId={compareBId}
+                  onSelectA={(c) => setCompareAId(c ? c.id : null)}
+                  onSelectB={(c) => setCompareBId(c ? c.id : null)}
+                />
+              )}
               {currentPage === 'roi-estimator' && <ROIEstimator />}
               {currentPage === 'niche-chart' && <NichePerformanceChart />}
               {currentPage === 'design-system' && <DesignSystemPage />}
@@ -2601,6 +2161,94 @@ export default function App() {
       <ChatAssistant />
 
       <WaitlistModal isOpen={isWaitlistOpen} onClose={() => setIsWaitlistOpen(false)} />
+
+      {/* 22. Floating Creator Comparison Tray */}
+      <AnimatePresence>
+        {(compareAId !== null || compareBId !== null) && currentPage !== 'comparison' && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0B1528]/95 dark:bg-[#0B1528]/95 backdrop-blur-md rounded-[20px] shadow-2xl border border-white/10 px-6 py-4 flex items-center gap-6 max-w-2xl w-[90%] md:w-auto"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-coral/20 p-2 rounded-xl text-coral hidden sm:block">
+                <SlidersHorizontal size={20} />
+              </div>
+              <div className="text-left">
+                <h4 className="text-white text-xs font-bold uppercase tracking-wider">Comparison Queue</h4>
+                <p className="text-white/60 text-[11px] font-mono">
+                  {compareAId && compareBId ? '2 of 2 selected' : 'Select another to compare'}
+                </p>
+              </div>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10 hidden md:block" />
+
+            <div className="flex items-center gap-3 flex-1 select-none">
+              {/* Creator A slot */}
+              <div className="flex items-center gap-2 bg-white/5 py-1.5 px-3 rounded-xl border border-white/5">
+                <span className="text-[11px] font-bold text-white leading-none whitespace-nowrap">
+                  {compareAId 
+                    ? CREATORS.find(c => c.id === compareAId)?.name || 'Creator A'
+                    : 'Select A...'
+                  }
+                </span>
+                {compareAId && (
+                  <button 
+                    onClick={() => setCompareAId(null)}
+                    className="text-white/40 hover:text-coral transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+
+              <span className="text-white/30 text-xs font-bold px-1 font-serif">vs</span>
+
+              {/* Creator B slot */}
+              <div className="flex items-center gap-2 bg-white/5 py-1.5 px-3 rounded-xl border border-white/5">
+                <span className="text-[11px] font-bold text-white leading-none whitespace-nowrap">
+                  {compareBId 
+                    ? CREATORS.find(c => c.id === compareBId)?.name || 'Creator B'
+                    : 'Select B...'
+                  }
+                </span>
+                {compareBId && (
+                  <button 
+                    onClick={() => setCompareBId(null)}
+                    className="text-white/40 hover:text-coral transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  window.location.hash = '#comparison';
+                }}
+                disabled={!compareAId || !compareBId}
+                className="bg-coral hover:bg-coral/90 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1 transition-all disabled:opacity-40 shadow-lg shadow-coral/10"
+              >
+                <span>Compare</span>
+                <ArrowRight size={12} />
+              </button>
+              <button
+                onClick={() => {
+                  setCompareAId(null);
+                  setCompareBId(null);
+                }}
+                className="text-white/50 hover:text-white text-xs font-bold transition-colors py-2 px-1"
+              >
+                Clear
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
