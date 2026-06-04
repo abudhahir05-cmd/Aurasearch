@@ -43,6 +43,7 @@ import {
   ExternalLink,
   Search,
   SlidersHorizontal,
+  Loader2,
   ShoppingCart,
   Coffee,
   Smartphone,
@@ -1010,16 +1011,68 @@ const SimulationCardContent = () => {
     { label: "Timing", value: "Peak travel hours (7–9 AM)" }
   ];
 
+  // Map step to descriptive real-time sub-tasks
+  const getStepText = (s: number) => {
+    switch (s) {
+      case 0: return "Booting Coimbatore Sandbox nodes...";
+      case 1: return "Parsing regional micro-vlogs & chats...";
+      case 2: return "Extracting transit feedback and cost sentiments...";
+      case 3: return "Auditing local commute heatmaps...";
+      case 4: return "Simulation success! Report compiled.";
+      default: return "";
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-deep-navy/30 rounded-[20px] shadow-warm border border-border-warm overflow-hidden">
-      <div className="bg-teal px-8 py-4 flex flex-col md:flex-row md:justify-between md:items-center text-white">
-        <h3 className="font-serif text-xl font-bold">Red Taxi · Coimbatore · Transport & Commute</h3>
+      <div className="bg-teal px-8 py-5 flex flex-col md:flex-row md:justify-between md:items-center text-white relative">
+        <div className="mr-4">
+          <h3 className="font-serif text-xl font-bold">Red Taxi · Coimbatore · Transport & Commute</h3>
+          <AnimatePresence mode="wait">
+            {isRunning && (
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                className="text-[11px] font-mono uppercase tracking-wider font-bold text-coral-light/90 mt-1.5 flex items-center gap-1.5"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-coral animate-ping" />
+                <span>{getStepText(step)}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        
         <button 
           onClick={startSimulation}
           disabled={isRunning && step < 4}
-          className="mt-4 md:mt-0 bg-white text-teal text-xs font-bold px-5 py-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+          className="relative mt-4 md:mt-0 bg-white text-teal text-xs font-bold px-6 py-3 rounded-full shadow-md hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-80 disabled:hover:scale-100 overflow-hidden min-w-[170px] select-none text-center"
         >
-          {isRunning && step < 4 ? 'Simulating...' : 'Run Simulation'}
+          {/* Animated loading progress bar background filling the button */}
+          {isRunning && step < 4 && (
+            <motion.div 
+              className="absolute inset-y-0 left-0 bg-teal/15 dark:bg-teal/20"
+              initial={{ width: '0%' }}
+              animate={{ width: `${(step / 4) * 100}%` }}
+              transition={{ duration: 0.8, ease: "linear" }}
+            />
+          )}
+
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            {isRunning && step < 4 ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-teal shrink-0" />
+                <span>Simulating... {step * 25}%</span>
+              </>
+            ) : isRunning && step === 4 ? (
+              <span className="text-teal font-extrabold flex items-center gap-1">
+                ✓ Re-run Simulation
+              </span>
+            ) : (
+              <span>Run Simulation</span>
+            )}
+          </span>
         </button>
       </div>
       
@@ -1027,35 +1080,41 @@ const SimulationCardContent = () => {
         <div className="p-8 border-r border-border-warm">
           <h4 className="text-deep-navy dark:text-white font-bold text-sm uppercase tracking-widest mb-6">What SCRAG Found</h4>
           <ul className="space-y-4">
-            {findings.map((item, i) => (
-              <motion.li 
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={isRunning && step > 0 ? { opacity: 1, x: 0 } : { opacity: 0 }}
-                transition={{ delay: i * 0.2 }}
-                className="flex items-start gap-3"
-              >
-                <Check size={16} className="text-teal mt-1 shrink-0" />
-                <span className="text-muted dark:text-white/60 text-sm leading-relaxed">{item}</span>
-              </motion.li>
-            ))}
+            {findings.map((item, i) => {
+              const isVisible = isRunning && step >= (i + 1);
+              return (
+                <motion.li 
+                  key={i}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={isVisible ? { opacity: 1, x: 0 } : { opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                  className="flex items-start gap-3"
+                >
+                  <Check size={16} className="text-teal mt-1 shrink-0" />
+                  <span className="text-muted dark:text-white/60 text-sm leading-relaxed">{item}</span>
+                </motion.li>
+              );
+            })}
           </ul>
         </div>
         
         <div className="p-8 bg-warm-beige/30 dark:bg-white/5">
           <h4 className="text-deep-navy dark:text-white font-bold text-sm uppercase tracking-widest mb-6">Campaign Output</h4>
           <div className="space-y-6">
-            {outputs.map((out, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={isRunning && step > 0 ? { opacity: 1, y: 0 } : { opacity: 0 }}
-                transition={{ delay: 0.8 + (i * 0.2) }}
-              >
-                <div className="text-[10px] font-bold text-muted dark:text-white/40 uppercase mb-1">{out.label}</div>
-                <div className="text-deep-navy dark:text-white font-bold">{out.value}</div>
-              </motion.div>
-            ))}
+            {outputs.map((out, i) => {
+              const isVisible = isRunning && step >= (i + 1);
+              return (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                >
+                  <div className="text-[10px] font-bold text-muted dark:text-white/40 uppercase mb-1">{out.label}</div>
+                  <div className="text-deep-navy dark:text-white font-bold">{out.value}</div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -2007,6 +2066,124 @@ export default function App() {
                 </div>
               </FadeInSection>
             </section>
+
+            {/* 6. Platform Key Features (with two related sub sections) */}
+            <section id="features" className="py-24 max-w-7xl mx-auto px-6 font-sans">
+              <FadeInSection>
+                <SectionHeader 
+                  label="PLATFORM INTEGRATION" 
+                  title="Dual-Engine Architecture for Local Campaign Precision" 
+                  center={true} 
+                  labelColor="text-coral"
+                />
+                <p className="text-center text-muted dark:text-white/60 mb-16 max-w-2xl mx-auto text-sm leading-relaxed font-sans">
+                  AuraSearch operates on a dual-engine protocol framework that couples hyper-local audience verification with predictive neural simulation modeling.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-10">
+                  {/* Subsection 1: Hyper-Local Trust Verification */}
+                  <div className="group bg-gradient-to-br from-white to-warm-beige/30 dark:from-white/5 dark:to-deep-navy/20 p-8 md:p-10 rounded-[32px] border border-border-warm dark:border-white/10 hover:border-coral/50 dark:hover:border-coral/50 transition-all duration-300 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div className="w-14 h-14 rounded-2xl bg-coral/5 dark:bg-coral/10 flex items-center justify-center shrink-0 mb-6 text-coral group-hover:scale-105 transition-transform animate-none">
+                        <Award size={26} />
+                      </div>
+                      <h3 className="font-serif text-2xl font-bold text-deep-navy dark:text-white mb-3">
+                        Hyper-Local Trust Verification
+                      </h3>
+                      <p className="text-xs text-muted dark:text-white/50 mb-8 font-sans leading-relaxed uppercase tracking-wider">
+                        Engine Tier 1 &bull; SCRAG Audit Protocol
+                      </p>
+                      
+                      <p className="text-sm text-muted dark:text-white/70 mb-8 leading-relaxed font-sans">
+                        Our proprietary SCRAG ledger screens and qualifies creators in secondary local markets. We map exact neighborhood densities and eliminate influencer metric hyper-inflation.
+                      </p>
+
+                      <ul className="space-y-4 font-sans text-sm">
+                        <li className="flex items-start gap-3">
+                          <span className="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center shrink-0 mt-0.5"><Check size={12} /></span>
+                          <div>
+                            <span className="font-bold text-deep-navy dark:text-white">Cultural & Dialect Safeguards</span>
+                            <p className="text-xs text-muted dark:text-white/60 mt-0.5">Scours vernacular dialog depth to ensure alignment with target city listeners.</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center shrink-0 mt-0.5"><Check size={12} /></span>
+                          <div>
+                            <span className="font-bold text-deep-navy dark:text-white">Demographic Hub Filtering</span>
+                            <p className="text-xs text-muted dark:text-white/60 mt-0.5">Guarantees audience density residing physically in verified zip codes.</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center shrink-0 mt-0.5"><Check size={12} /></span>
+                          <div>
+                            <span className="font-bold text-deep-navy dark:text-white">Authentic Engagement Auditing</span>
+                            <p className="text-xs text-muted dark:text-white/60 mt-0.5">Weeds out robotic like-groups and comment loops to secure high trust.</p>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="mt-10 border-t border-border-warm dark:border-white/5 pt-6 flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-muted dark:text-white/40">Active Node Status: Live</span>
+                      <a href="#leaderboard" className="text-xs font-bold text-coral flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        Verify Creators <ArrowRight size={14} />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Subsection 2: AI-Powered Predictive Simulation */}
+                  <div className="group bg-gradient-to-br from-white to-warm-beige/30 dark:from-white/5 dark:to-deep-navy/20 p-8 md:p-10 rounded-[32px] border border-border-warm dark:border-white/10 hover:border-coral/50 dark:hover:border-coral/50 transition-all duration-300 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div className="w-14 h-14 rounded-2xl bg-coral/5 dark:bg-coral/10 flex items-center justify-center shrink-0 mb-6 text-coral group-hover:scale-105 transition-transform">
+                        <Brain size={26} />
+                      </div>
+                      <h3 className="font-serif text-2xl font-bold text-deep-navy dark:text-white mb-3">
+                        AI-Powered Predictive Simulation
+                      </h3>
+                      <p className="text-xs text-muted dark:text-white/50 mb-8 font-sans leading-relaxed uppercase tracking-wider">
+                        Engine Tier 2 &bull; Pre-Campaign Modeling
+                      </p>
+                      
+                      <p className="text-sm text-muted dark:text-white/70 mb-8 leading-relaxed font-sans">
+                        Simulate entire performance outcomes before allocating single rupees. Our neural modeling estimates conversions, generates timeline calendars, and projects ROI metrics.
+                      </p>
+
+                      <ul className="space-y-4 font-sans text-sm">
+                        <li className="flex items-start gap-3">
+                          <span className="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center shrink-0 mt-0.5"><Check size={12} /></span>
+                          <div>
+                            <span className="font-bold text-deep-navy dark:text-white">Outcome Predictor Engine</span>
+                            <p className="text-xs text-muted dark:text-white/60 mt-0.5">Forecast impressions, reach, confidence profiles, and risks in seconds.</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center shrink-0 mt-0.5"><Check size={12} /></span>
+                          <div>
+                            <span className="font-bold text-deep-navy dark:text-white">AI Brief & Calendar Builders</span>
+                            <p className="text-xs text-muted dark:text-white/60 mt-0.5">Generates precise campaign workflows, posting times, and brand guidelines.</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center shrink-0 mt-0.5"><Check size={12} /></span>
+                          <div>
+                            <span className="font-bold text-deep-navy dark:text-white">Regional Trend Forecasters</span>
+                            <p className="text-xs text-muted dark:text-white/60 mt-0.5 font-sans">Predict growth spikes in specific consumer categories or local areas.</p>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="mt-10 border-t border-border-warm dark:border-white/5 pt-6 flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-muted dark:text-white/40 font-sans">Modeling Nodes: Optimizing</span>
+                      <a href="#sandbox" className="text-xs font-bold text-coral flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        Launch Simulator <ArrowRight size={14} />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </FadeInSection>
+            </section>
+
             {/* 17. For Creators */}
             <section id="creators" className="py-24 bg-[#F2F8F6] dark:bg-teal/5 px-6 border-b border-border-warm dark:border-teal/10">
               <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
