@@ -4,6 +4,55 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AuraSearch | Predictable Influencer Outcomes</title>
+    <script>
+      // Defend against window/globalThis fetch setter TypeError in sandboxed environments
+      (function() {
+        try {
+          const nativeFetch = window.fetch || globalThis.fetch || (typeof self !== 'undefined' ? self.fetch : null);
+          if (!nativeFetch) return;
+
+          let currentFetch = nativeFetch;
+
+          const makeFetchSafeOn = (obj) => {
+            if (!obj) return;
+            try {
+              const descriptor = Object.getOwnPropertyDescriptor(obj, 'fetch');
+              if (descriptor && descriptor.configurable === false) {
+                return;
+              }
+              Object.defineProperty(obj, 'fetch', {
+                get() {
+                  return currentFetch;
+                },
+                set(value) {
+                  currentFetch = value;
+                },
+                configurable: true,
+                enumerable: true
+              });
+            } catch (e) {
+              try {
+                obj.fetch = currentFetch;
+              } catch (err) {}
+            }
+          };
+
+          // Define window.global if it doesn't exist
+          if (typeof global === 'undefined') {
+            try {
+              window.global = window;
+            } catch (e) {}
+          }
+
+          makeFetchSafeOn(window);
+          makeFetchSafeOn(globalThis);
+          if (typeof self !== 'undefined') makeFetchSafeOn(self);
+          if (typeof global !== 'undefined') makeFetchSafeOn(global);
+        } catch (err) {
+          console.warn("Global fetch protection warning:", err);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

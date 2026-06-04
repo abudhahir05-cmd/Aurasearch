@@ -9,6 +9,186 @@ const STARTER_PROMPTS = [
   "Top niche in Coimbatore"
 ];
 
+interface MessageBlock {
+  type: 'paragraph' | 'bullet-list' | 'numbered-list' | 'header';
+  items?: string[];
+  text?: string;
+}
+
+const parseBlocks = (text: string): MessageBlock[] => {
+  const lines = text.split('\n');
+  const blocks: MessageBlock[] = [];
+  let currentList: MessageBlock | null = null;
+
+  for (let line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (currentList) {
+        blocks.push(currentList);
+        currentList = null;
+      }
+      continue;
+    }
+
+    // Header check
+    if (trimmed.startsWith('#')) {
+      if (currentList) {
+        blocks.push(currentList);
+        currentList = null;
+      }
+      const headerText = trimmed.replace(/^#+\s*/, '');
+      blocks.push({ type: 'header', text: headerText });
+      continue;
+    }
+
+    // Bullet list checks (starts with -, *, or •)
+    const bulletMatch = trimmed.match(/^[\*\-•]\s+(.*)/);
+    if (bulletMatch) {
+      if (currentList && currentList.type !== 'bullet-list') {
+        blocks.push(currentList);
+        currentList = null;
+      }
+      if (!currentList) {
+        currentList = { type: 'bullet-list', items: [] };
+      }
+      currentList.items?.push(bulletMatch[1]);
+      continue;
+    }
+
+    // Numbered list checks
+    const numberedMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+    if (numberedMatch) {
+      if (currentList && currentList.type !== 'numbered-list') {
+        blocks.push(currentList);
+        currentList = null;
+      }
+      if (!currentList) {
+        currentList = { type: 'numbered-list', items: [] };
+      }
+      currentList.items?.push(numberedMatch[2]);
+      continue;
+    }
+
+    // If it's standard text but there is a current list in progress, finish it first
+    if (currentList) {
+      blocks.push(currentList);
+      currentList = null;
+    }
+    blocks.push({ type: 'paragraph', text: trimmed });
+  }
+
+  if (currentList) {
+    blocks.push(currentList);
+  }
+
+  return blocks;
+};
+
+const renderFormattedText = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={index} className="font-extrabold text-coral font-sans dark:text-amber-400">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
+const FormattedMessage = ({ content }: { content: string }) => {
+  const blocks = parseBlocks(content);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08
+      }
+    }
+  };
+
+  const blockVariants = {
+    hidden: { opacity: 0, y: 8 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } }
+  };
+
+  return (
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-3.5 text-deep-navy/90"
+    >
+      {blocks.map((block, idx) => {
+        if (block.type === 'header') {
+          return (
+            <motion.h4 
+              key={idx}
+              variants={blockVariants} 
+              className="font-sans font-bold text-sm text-deep-navy border-b border-border-warm pb-1 mt-3 mb-1.5 first:mt-0 flex items-center gap-1.5"
+            >
+              <span className="w-1.5 h-3.5 bg-coral rounded-full inline-block" />
+              {renderFormattedText(block.text || '')}
+            </motion.h4>
+          );
+        }
+
+        if (block.type === 'bullet-list' && block.items) {
+          return (
+            <ul key={idx} className="space-y-2.5 my-2.5 pl-0">
+              {block.items.map((item, itemIdx) => (
+                <motion.li 
+                  key={itemIdx}
+                  variants={blockVariants}
+                  className="flex items-start gap-2 bg-warm-beige/30 p-2.5 rounded-xl border border-teal/5 hover:border-coral/20 hover:bg-warm-beige/50 hover:shadow-xs transition-all duration-200 cursor-default"
+                >
+                  <span className="flex-shrink-0 mt-1 w-3.5 h-3.5 bg-coral/10 text-coral rounded-full flex items-center justify-center text-[9px] font-extrabold select-none">
+                     ✓
+                  </span>
+                  <span className="text-sm leading-relaxed text-deep-navy">{renderFormattedText(item)}</span>
+                </motion.li>
+              ))}
+            </ul>
+          );
+        }
+
+        if (block.type === 'numbered-list' && block.items) {
+          return (
+            <ol key={idx} className="space-y-2.5 my-2.5 pl-0">
+              {block.items.map((item, itemIdx) => (
+                <motion.li 
+                  key={itemIdx}
+                  variants={blockVariants}
+                  className="flex items-start gap-2 bg-teal/5 p-2.5 rounded-xl border border-teal/10 hover:border-teal/20 hover:bg-teal/10 hover:shadow-xs transition-all duration-200 cursor-default"
+                >
+                  <span className="flex-shrink-0 mt-0.5 w-5 h-5 bg-teal text-white rounded-full flex items-center justify-center text-[10px] font-extrabold shadow-sm select-none">
+                     {itemIdx + 1}
+                  </span>
+                  <span className="text-sm leading-relaxed text-deep-navy">{renderFormattedText(item)}</span>
+                </motion.li>
+              ))}
+            </ol>
+          );
+        }
+
+        return (
+          <motion.p 
+            key={idx}
+            variants={blockVariants} 
+            className="text-sm leading-relaxed text-deep-navy/85"
+          >
+            {renderFormattedText(block.text || '')}
+          </motion.p>
+        );
+      })}
+    </motion.div>
+  );
+};
+
 export const ChatAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
@@ -112,8 +292,8 @@ export const ChatAssistant = () => {
 
                {messages.map((m, i) => (
                   <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                     <div className={`max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-coral text-white rounded-tr-none shadow-sm' : 'bg-white text-deep-navy rounded-tl-none border border-teal/20 shadow-sm'}`}>
-                        {m.content}
+                     <div className={`${m.role === 'user' ? 'max-w-[80%]' : 'max-w-[90%]'} p-4 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-coral text-white rounded-tr-none shadow-sm' : 'bg-white text-deep-navy rounded-tl-none border border-teal/20 shadow-sm'}`}>
+                        {m.role === 'user' ? m.content : <FormattedMessage content={m.content} />}
                      </div>
                   </div>
                ))}

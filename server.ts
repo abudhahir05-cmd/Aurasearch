@@ -24,7 +24,7 @@ const ai = new GoogleGenAI({
 app.post("/api/generate-brief", async (req, res) => {
   try {
     const { brandName, city, category, goal } = req.body;
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-3.5-flash";
     
     const prompt = `Brand: ${brandName}
 City: ${city}
@@ -53,7 +53,7 @@ Write a hyper-local influencer campaign brief using SCRAG intelligence.`;
 app.post("/api/predict-outcome", async (req, res) => {
   try {
     const { score, budget, platform, contentType, nicheMatch, tier } = req.body;
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-3.5-flash";
 
     const prompt = `SCRAG Score: ${score}
 Budget: ₹${budget}
@@ -84,12 +84,22 @@ Predict this influencer campaign's outcome with reasoning.`;
 app.post("/api/chat", async (req, res) => {
   try {
     const { messages } = req.body;
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-3.5-flash";
 
     const chat = ai.chats.create({
       model,
       config: {
-        systemInstruction: "You are SCRAG Assistant — an expert in regional influencer marketing for Indian brands. You have access to a database of 300 Indian micro-influencers across 8 cities: Coimbatore, Chennai, Bangalore, Mumbai, Delhi, Hyderabad, Kochi, and Pune.\n\nNiches available: Travel, Food, Tech, Fashion, Fitness, Comedy, Education, Beauty, Finance, Auto.\n\nSCRAG scores range from 0–100. Scores above 70 are strong fits.\n\nWhen asked for creator recommendations, always mention:\n- City and niche match\n- Approximate SCRAG score range\n- Why they are a good fit for the brand\n\nKeep responses concise, confident, and data-driven. Never make up specific creator names — refer to creator profiles in general terms. Always end with a follow-up question or suggestion.",
+        systemInstruction: `You are SCRAG Assistant — an expert in regional creator search and hyper-local campaign optimization for Indian brands. You have access to structured insights across 8 regional hub cities: Coimbatore, Chennai, Bangalore, Mumbai, Delhi, Hyderabad, Kochi, and Pune.
+
+Niches available: Travel, Food, Tech, Fashion, Fitness, Comedy, Education, Beauty, Finance, Auto.
+SCRAG scores range from 0–100. Scores above 70 are considered strong campaign fits.
+
+CRITICAL FORMATTING INSTRUCTIONS:
+1. NEVER output massive block paragraphs.
+2. ALWAYS split your answers into structured, clear, and easy-to-read lists (either bullet points starting with '-' or numbered steps starting with '1.').
+3. For creator recommendations, present profiles one-by-one with clear metrics on separate bulleted lines. Use double asterisks for bold highlights (e.g. **Niche Match:** Travel, **SCRAG Score:** 84, **Region:** Kochi).
+4. Explain calculation metrics, cities, or campaigns in orderly items.
+5. End every single output with a proactive, clean follow-up suggsetion or question.`,
       },
     });
 
@@ -111,7 +121,7 @@ app.post("/api/chat", async (req, res) => {
 app.post("/api/generate-timeline", async (req, res) => {
   try {
     const { brand, city, niche, goal, duration } = req.body;
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-3.5-flash";
 
     const prompt = `Brand: ${brand}, City: ${city}, Niche: ${niche}, Goal: ${goal}, Duration: ${duration}
 

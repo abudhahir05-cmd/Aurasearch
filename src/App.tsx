@@ -8,9 +8,13 @@ import { motion, AnimatePresence, useInView } from 'motion/react';
 import { 
   Check, 
   X, 
+  Plus,
   ChevronRight, 
   Menu, 
   ArrowRight, 
+  LogOut,
+  LogIn,
+  User, 
   Star, 
   Users, 
   Target, 
@@ -59,6 +63,7 @@ import {
   Compass,
   ArrowUpRight
 } from 'lucide-react';
+import { AreaChart, Area, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import { ThemeToggle } from './components/ThemeToggle';
 import { NichePerformanceChart } from './components/NichePerformanceChart';
 import { AIBriefGenerator } from './components/AIBriefGenerator';
@@ -71,7 +76,7 @@ import { CampaignTimelineBuilder } from './components/CampaignTimelineBuilder';
 import { DesignSystemPage } from './components/DesignSystemPage';
 import { EnterpriseDashboard } from './components/EnterpriseDashboard';
 import { CreatorProfile } from './components/CreatorProfile';
-const productLogo = '/src/assets/images/product_logo_1779731862866.png';
+import productLogo from './assets/images/product_logo_1779731862866.png';
 
 const LogoIcon = ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg', className?: string }) => {
   const sizeClasses = {
@@ -365,6 +370,7 @@ const SubPageLayout = ({ pageId, children, onBack }: { pageId: string, children:
 };
 
 const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => void, onNavClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void, currentPage: string }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -655,39 +661,6 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
             </NavItem>
 
             <NavItem 
-              label="Features" 
-              active={isSectionActive(['brief-generator', 'leaderboard', 'comparison', 'roi-estimator'])}
-            >
-              <div className="p-2 flex w-[820px]">
-                <div className="flex-1 grid grid-cols-2 gap-2">
-                  {FEATURES_LINKS.map((col, idx) => (
-                    <div key={idx} className="space-y-1">
-                      <div className="px-4 pt-4 pb-2 text-[10px] font-black text-muted dark:text-white/30 uppercase tracking-[0.15em]">{col.group}</div>
-                      {col.items.map((item, i) => <DropdownItem key={i} {...item} />)}
-                    </div>
-                  ))}
-                </div>
-                <div className="w-[280px] p-4 m-2 bg-coral rounded-2xl text-white flex flex-col justify-between">
-                  <div>
-                    <div className="bg-white/20 w-fit px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest mb-4">✦ NEW</div>
-                    <h4 className="font-serif text-xl font-bold mb-2">Virtual Sandbox</h4>
-                    <p className="text-white/70 text-xs leading-relaxed">Now with AI-powered campaign simulation and real-time outcomes.</p>
-                  </div>
-                  <button 
-                    onClick={() => {
-                       const el = document.getElementById('sandbox');
-                       if (el) el.scrollIntoView({ behavior: 'smooth' });
-                       setActiveDropdown(null);
-                    }}
-                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest mt-8 group"
-                  >
-                    Try it now <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            </NavItem>
-
-            <NavItem 
               label="Resources" 
               active={false}
             >
@@ -706,12 +679,36 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
 
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <button 
-              onClick={onOpenModal}
-              className="hidden sm:block bg-coral text-white text-xs font-black uppercase tracking-widest px-6 py-3.5 rounded-[12px] shadow-warm hover:-translate-y-0.5 hover:shadow-warm-hover active:translate-y-0 transition-all"
-            >
-              Get Early Access
-            </button>
+            {isLoggedIn ? (
+              <div className="flex items-center gap-3">
+                <div className="hidden md:flex items-center gap-2 bg-warm-beige dark:bg-white/5 border border-border-warm dark:border-white/10 px-3 py-1.5 rounded-[12px]">
+                  <div className="w-6 h-6 rounded-full bg-coral text-white font-extrabold text-[10px] flex items-center justify-center shadow-sm uppercase">
+                    H
+                  </div>
+                  <div className="flex flex-col text-left leading-none">
+                    <span className="text-[9px] font-black tracking-wider uppercase text-muted">Aura Workspace</span>
+                    <span className="text-[10px] font-bold text-deep-navy dark:text-white truncate max-w-[130px]" title="hitman237560@gmail.com">
+                      hitman237560@gmail.com
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsLoggedIn(false)}
+                  className="bg-deep-navy/5 dark:bg-white/5 text-deep-navy dark:text-white border border-border-warm dark:border-white/10 py-2.5 rounded-[12px] hover:text-coral hover:bg-coral/5 hover:border-coral/40 dark:hover:text-coral dark:hover:bg-coral/10 transition-all flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-4"
+                  title="Logout Session"
+                >
+                  <LogOut size={13} />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setIsLoggedIn(true)}
+                className="bg-coral text-white text-xs font-black uppercase tracking-widest px-6 py-3.5 rounded-[12px] shadow-warm hover:-translate-y-0.5 hover:shadow-warm-hover active:translate-y-0 transition-all cursor-pointer"
+              >
+                Log In
+              </button>
+            )}
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden p-2 text-deep-navy dark:text-white rounded-lg bg-warm-beige dark:bg-white/5 border border-border-warm dark:border-white/10"
@@ -745,10 +742,52 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
               </button>
             </div>
 
+            {/* Mobile/Tablet/Other Device Session Profile & Logout Action */}
+            <div className="mb-6 p-5 rounded-2xl bg-white/5 border border-white/10 select-none">
+              {isLoggedIn ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-coral text-white font-extrabold flex items-center justify-center shadow-lg text-sm select-none">
+                      H
+                    </div>
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[9px] font-black tracking-widest uppercase text-coral">Enterprise Session Active</span>
+                      <span className="text-sm font-bold text-white mt-1 truncate max-w-[220px]" title="hitman237560@gmail.com">
+                        hitman237560@gmail.com
+                      </span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setIsLoggedIn(false);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-black uppercase tracking-widest py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs cursor-pointer text-center"
+                  >
+                    <LogOut size={14} />
+                    Logout Session
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs text-white/50 leading-relaxed font-medium">You are currently viewing as Guest. Log in to activate administrative controls.</p>
+                  <button 
+                    onClick={() => {
+                      setIsLoggedIn(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-teal text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs cursor-pointer text-center"
+                  >
+                    <LogIn size={14} />
+                    Log In
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2 flex-grow">
               {[
                 { label: 'Platform', links: PLATFORM_LINKS.flatMap(g => g.items) },
-                { label: 'Features', links: FEATURES_LINKS.flatMap(g => g.items) },
                 { label: 'Resources', links: RESOURCES_LINKS.flatMap(g => g.items) },
               ].map((group) => (
                 <div key={group.label} className="border-b border-white/5">
@@ -797,12 +836,14 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
             </div>
 
             <div className="mt-12 space-y-6 pt-12 border-t border-white/5">
-              <button 
-                onClick={() => { setIsMobileMenuOpen(false); onOpenModal(); }}
-                className="w-full bg-coral text-white font-black uppercase tracking-widest py-5 rounded-2xl shadow-xl hover:-translate-y-1 transition-all"
-              >
-                Get Early Access
-              </button>
+              {!isLoggedIn && (
+                <button 
+                  onClick={() => { setIsMobileMenuOpen(false); onOpenModal(); }}
+                  className="w-full bg-coral text-white font-black uppercase tracking-widest py-5 rounded-2xl shadow-xl hover:-translate-y-1 transition-all"
+                >
+                  Get Early Access
+                </button>
+              )}
               <div className="flex justify-center">
                 <ThemeToggle />
               </div>
@@ -951,7 +992,345 @@ const StatCounter: React.FC<{ target: number, label: string, suffix: string }> =
   );
 };
 
-const Sandbox = ({ isSubpage = false }: { isSubpage?: boolean }) => {
+const getCampaignSimulation = (creator: Creator) => {
+  const campaignName = `${creator.name} Selection`;
+  let brandName = "Brand Partner";
+  let targetTopic = "Campaign Topic";
+  let findings = [
+    `Local relevance in ${creator.city} detected`,
+    `Matches interests in ${creator.niche}`,
+    `Trust index score at ${creator.score}%`,
+    `Optimal engagement timing predicted`
+  ];
+  let outputs = [
+    { label: "Creator name", value: creator.name },
+    { label: "Dynamic Hook", value: `"Authentic ${creator.niche} sharing in ${creator.city}"` },
+    { label: "Format", value: "Dedicated Video + Reel Integration" },
+    { label: "City Dialect Coverage", value: `${creator.city} local dialect` }
+  ];
+
+  if (creator.niche === 'Travel') {
+    brandName = "IndiGo regional flight promo / local tourism";
+    targetTopic = `Discovering Hidden Gems in ${creator.city}`;
+    findings = [
+      `Local weekend travelers in ${creator.city} highly active`,
+      `Audience looking for transit options & getaways`,
+      `Optimal posting hours: Fridays at 5:00 PM`,
+      `High-fidelity reach verified: ${creator.followers} audience`
+    ];
+    outputs = [
+      { label: "Campaign Anchor", value: creator.name },
+      { label: "Content Hook", value: `"Planning a city escape from ${creator.city}? Check this out 🎒"` },
+      { label: "Creative Asset", value: "1x IG Vlog + 2x interactive stories" },
+      { label: "Target Audience", value: `Tier-2 regional commuters from ${creator.city}` }
+    ];
+  } else if (creator.niche === 'Food') {
+    brandName = "Zomato regional / local brand partner";
+    targetTopic = `Street food review & local culinary guide`;
+    findings = [
+      `Extreme engagement on regional food reels in ${creator.city}`,
+      `High trust rating (${creator.score}/100) on local café mentions`,
+      `Comment sentiment: 94% positive and receptive`,
+      `Audience size: ${creator.followers} high-intent foodies`
+    ];
+    outputs = [
+      { label: "Campaign Anchor", value: creator.name },
+      { label: "Content Hook", value: `"Is this really the best parotta place in ${creator.city}? let's test! 🍲"` },
+      { label: "Creative Asset", value: "1x detailed review reel + location pin" },
+      { label: "Dialect Focus", value: `Regional conversational dialect of ${creator.city}` }
+    ];
+  } else if (creator.niche === 'Fitness') {
+    brandName = "Cult.fit home workout / regional health";
+    targetTopic = `Daily lifestyle & fitness goals`;
+    findings = [
+      `Micro-communities in ${creator.city} tracking active routines`,
+      `Sentiment maps point to high trust in home routine tips`,
+      `Engagement rate is ${((creator.score * 0.12)).toFixed(1)}% (above niche median)`,
+      `Strongest demographic: 18-34 years in ${creator.city}`
+    ];
+    outputs = [
+      { label: "Campaign Anchor", value: creator.name },
+      { label: "Content Hook", value: `"No gym? No problem! Try my daily home workout in ${creator.city} 💪"` },
+      { label: "Creative Asset", value: "30-day challenge series reels" },
+      { label: "Est. CPM / CPA", value: "Optimized regional cost-per-acquisition" }
+    ];
+  } else if (creator.niche === 'Tech') {
+    brandName = "Xiaomi regional launch / local retail launch";
+    targetTopic = `Unboxing & local context device review`;
+    findings = [
+      `Tech audience density in ${creator.city} searching for regional reviews`,
+      `Trust score (${creator.score}/100) ensures zero skepticism on sponsorships`,
+      `Direct replies show high intent for product pricing in ${creator.city}`,
+      `Verified local hub followers: ${creator.followers}`
+    ];
+    outputs = [
+      { label: "Campaign Anchor", value: creator.name },
+      { label: "Content Hook", value: `"Worth the upgrade? Local store testing in ${creator.city}! 📱"` },
+      { label: "Creative Asset", value: "Unboxing carousel + tech specs rundown" },
+      { label: "Regional Ingress", value: "Direct map directions link to regional retail hubs" }
+    ];
+  } else {
+    brandName = `AuraSearch Verified Regional Push`;
+    targetTopic = `Lifestyle Integration Campaign`;
+    findings = [
+      `Audience density detected in ${creator.city} watching ${creator.niche} content`,
+      `High local resonance verified via sentiment audit`,
+      `Peak conversation windows verified for ${creator.city} timezone`,
+      `Trust Score of ${creator.score} ensures high engagement rates`
+    ];
+    outputs = [
+      { label: "Campaign Anchor", value: creator.name },
+      { label: "Content Hook", value: `"My honest take on daily life here in ${creator.city}! ✨"` },
+      { label: "Creative Asset", value: "Creative Reel with dynamic transition + Q&A" },
+      { label: "Demographic Match", value: `Verified local high-affinity users` }
+    ];
+  }
+
+  return { campaignName, brandName, targetTopic, findings, outputs };
+};
+
+const GroupSimulationContainer = ({ 
+  simulatedCreators = [],
+  onResetSimulation
+}: { 
+  simulatedCreators: Creator[];
+  onResetSimulation?: () => void;
+}) => {
+  const [isRunning, setIsRunning] = useState(true);
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    setIsRunning(true);
+    setStep(0);
+    const interval = setInterval(() => {
+      setStep(prev => {
+        if (prev >= 4) {
+          clearInterval(interval);
+          setIsRunning(false);
+          return 4;
+        }
+        return prev + 1;
+      });
+    }, 850);
+    return () => clearInterval(interval);
+  }, [simulatedCreators]);
+
+  const triggerResetSimulation = () => {
+    setIsRunning(true);
+    setStep(0);
+    const interval = setInterval(() => {
+      setStep(prev => {
+        if (prev >= 4) {
+          clearInterval(interval);
+          setIsRunning(false);
+          return 4;
+        }
+        return prev + 1;
+      });
+    }, 850);
+  };
+
+  const stats = useMemo(() => {
+    const totalFollowersNum = simulatedCreators.reduce((acc, c) => {
+      const multiplier = c.followers.toLowerCase().includes('m') ? 1000000 : c.followers.toLowerCase().includes('k') ? 1000 : 1;
+      const numeric = parseFloat(c.followers.replace(/[kKmM]/g, ''));
+      return acc + (numeric * multiplier);
+    }, 0);
+
+    const totalFollowersFormatted = totalFollowersNum >= 1000000 
+      ? `${(totalFollowersNum / 1000000).toFixed(1)}M` 
+      : `${Math.round(totalFollowersNum / 1000)}K`;
+
+    const avgScore = Math.round(simulatedCreators.reduce((acc, c) => acc + c.score, 0) / simulatedCreators.length);
+
+    const projectedImpressions = Math.round(totalFollowersNum * 1.85);
+    const impressionsFormatted = projectedImpressions >= 1000000 
+      ? `${(projectedImpressions / 1000000).toFixed(2)}M` 
+      : `${Math.round(projectedImpressions / 1000)}K`;
+
+    return {
+      totalFollowers: totalFollowersFormatted,
+      avgScore,
+      projectedImpressions: impressionsFormatted
+    };
+  }, [simulatedCreators]);
+
+  return (
+    <div className="space-y-8 animate-fadeIn">
+      {/* Simulation Master Control & Stats Header */}
+      <div className="bg-gradient-to-br from-deep-navy via-[#12233c] to-deep-navy text-white rounded-[24px] border border-border-warm dark:border-white/10 p-8 shadow-xl overflow-hidden relative">
+        <div className="absolute inset-x-0 bottom-0 top-0 bg-[radial-gradient(circle_at_right_top,rgba(255,107,107,0.06),transparent_40%)] pointer-events-none" />
+        
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${isRunning ? 'bg-orange-500 animate-pulse' : 'bg-teal'}`} />
+              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-coral">Group Campaign Simulation Suite</span>
+            </div>
+            <h3 className="font-serif text-2xl lg:text-3xl font-black text-white leading-tight">
+              {isRunning ? 'Synthesizing Combined Audience Models...' : 'Campaign Simulation Analysis Ready'}
+            </h3>
+            <p className="text-white/60 text-xs mt-1.5 max-w-xl">
+              Parallel evaluation of {simulatedCreators.length} regional creators across specific local dialect clusters & niche categories.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => {
+                if (onResetSimulation) onResetSimulation();
+                window.location.hash = '#leaderboard';
+              }}
+              className="text-xs font-bold text-white/80 bg-white/5 hover:bg-white/10 transition-all border border-white/10 px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+            >
+              ← Back to Leaderboard
+            </button>
+            <button
+              onClick={triggerResetSimulation}
+              disabled={isRunning}
+              className="text-xs font-black uppercase tracking-widest text-white bg-coral hover:bg-coral/90 transition-all px-5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-warm disabled:opacity-50 cursor-pointer"
+            >
+              <Zap size={13} className={isRunning ? 'animate-bounce' : ''} />
+              {isRunning ? 'Simulating...' : 'Rerun Simulation'}
+            </button>
+          </div>
+        </div>
+
+        {/* Sync Progress Bar */}
+        <div className="mt-8 relative z-10 bg-white/5 border border-white/15 p-2.5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="font-mono text-[10px] font-bold text-white/50 tracking-wider">PROG: [STEP 0{step}/04]</div>
+          <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+            <motion.div 
+              className="h-full bg-gradient-to-r from-coral to-teal"
+              initial={{ width: '0%' }}
+              animate={{ width: `${(step / 4) * 100}%` }}
+              transition={{ ease: "easeInOut", duration: 0.5 }}
+            />
+          </div>
+          <div className="text-[10px] font-black uppercase tracking-widest text-teal font-mono">
+            {step === 0 && 'Initializing Regional Sentiment Nodes...'}
+            {step === 1 && 'Scanning Local Dialect Patterns...'}
+            {step === 2 && 'Auditing Comment Section Authority...'}
+            {step === 3 && 'Generating Brand Sync Creative Briefs...'}
+            {step === 4 && 'Simulation Complete! Displays Active'}
+          </div>
+        </div>
+
+        {/* Collective Stats Dashboard */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8 pt-8 border-t border-white/10 relative z-10">
+          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
+            <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Combined Followers Reach</div>
+            <div className="text-2xl font-black text-white tracking-tight">{stats.totalFollowers}</div>
+          </div>
+          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
+            <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Average SCRAG Score</div>
+            <div className="text-2xl font-black text-teal tracking-tight">{stats.avgScore} / 100</div>
+          </div>
+          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
+            <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Simulated Joint Impressions</div>
+            <div className="text-2xl font-black text-coral tracking-tight">~{stats.projectedImpressions}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid of Simulated Creators */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {simulatedCreators.map(creator => {
+          const sim = getCampaignSimulation(creator);
+          return (
+            <motion.div 
+              key={creator.id}
+              layout
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-deep-navy/30 rounded-[20.5px] border border-border-warm dark:border-white/10 shadow-sm overflow-hidden"
+            >
+              {/* Card top banner with branding and region */}
+              <div className="bg-warm-beige/35 dark:bg-white/5 px-6 py-4.5 border-b border-border-warm dark:border-white/10 flex items-center justify-between gap-4">
+                <div className="flex flex-col leading-tight">
+                  <span className="text-[9px] font-black tracking-widest text-muted dark:text-white/40 uppercase">Creator Node Simulation</span>
+                  <span className="text-sm font-bold text-deep-navy dark:text-white mt-0.5">{creator.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-teal/10 border border-teal/15 text-teal px-2.5 py-1 rounded-full">{creator.city}</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-coral/10 border border-coral/15 text-coral px-2.5 py-1 rounded-full">{creator.niche}</span>
+                </div>
+              </div>
+
+              {/* Grid content inside the simulated card */}
+              <div className="grid md:grid-cols-1 gap-0">
+                {/* Findings block */}
+                <div className="p-6 border-b border-border-warm dark:border-white/10">
+                  <h4 className="text-deep-navy dark:text-white font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                    <Activity size={13} className="text-teal" /> Dialect & Local Findings
+                  </h4>
+                  <ul className="space-y-3">
+                    {sim.findings.map((item, i) => (
+                      <motion.li 
+                        key={i}
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={step > 0 ? { opacity: 1, x: 0 } : { opacity: 0 }}
+                        className="flex items-start gap-2 text-xs"
+                      >
+                        <Check size={13} className="text-teal mt-0.5 shrink-0" />
+                        <span className="text-muted dark:text-white/60 leading-relaxed font-semibold">{item}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Campaign Outputs block */}
+                <div className="p-6 bg-warm-beige/10 dark:bg-white/5">
+                  <h4 className="text-deep-navy dark:text-white font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                    <Zap size={13} className="text-coral" /> Campaign Output Specs
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {sim.outputs.map((out, i) => (
+                      <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={step > 2 ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                        className="flex flex-col"
+                      >
+                        <div className="text-[9px] font-bold text-muted dark:text-white/30 uppercase tracking-wider mb-0.5">{out.label}</div>
+                        <div className="text-deep-navy dark:text-white text-xs font-bold leading-tight">{out.value}</div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Completeness message footer */}
+              {step === 4 && (
+                <motion.div 
+                  initial={{ height: 0 }}
+                  animate={{ height: 'auto' }}
+                  className="bg-teal/10 border-t border-border-warm dark:border-white/10 p-4 text-center"
+                >
+                  <div className="text-teal font-serif text-xs font-bold flex items-center justify-center gap-1.5">
+                    <span>Campaign Fit Verified</span>
+                    <Sparkles size={11} className="text-teal animate-pulse" />
+                    <span>Score: {creator.score}/100</span>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const Sandbox = ({ 
+  isSubpage = false, 
+  simulatedCreators = [],
+  onResetSimulation
+}: { 
+  isSubpage?: boolean;
+  simulatedCreators?: Creator[];
+  onResetSimulation?: () => void;
+}) => {
   const [activeTab, setActiveTab] = useState<'simulation' | 'timeline'>('simulation');
 
   useEffect(() => {
@@ -990,7 +1369,14 @@ const Sandbox = ({ isSubpage = false }: { isSubpage?: boolean }) => {
       <AnimatePresence mode="wait">
          {activeTab === 'simulation' ? (
             <motion.div key="simulation" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-               <SimulationCardContent />
+               {simulatedCreators && simulatedCreators.length > 0 ? (
+                 <GroupSimulationContainer 
+                    simulatedCreators={simulatedCreators} 
+                    onResetSimulation={onResetSimulation}
+                 />
+               ) : (
+                 <SimulationCardContent />
+               )}
             </motion.div>
          ) : (
             <motion.div key="timeline" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
@@ -1206,7 +1592,85 @@ const ScragCalculator = ({ isSubpage = false }: { isSubpage?: boolean }) => {
   );
 };
 
-const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
+// --- Sparkline and Growth Trend Helpers ---
+
+export const generateGrowthData = (creatorId: number, score: number) => {
+  const data = [];
+  // Use a seed based on creator ID to ensure the sparkline values are deterministic and stable
+  const baseValue = 5000 + (creatorId * 43) % 2500;
+  let currentValue = baseValue;
+  // 8 points representing 30 days of growth
+  for (let i = 0; i < 8; i++) {
+    // Determine growth rate based on SCRAG score with seed-based variance
+    const growthRate = ((score - 50) / 12) + (Math.sin(creatorId * 1.7 + i) * 1.5);
+    const increment = Math.max(0, Math.round(currentValue * (Math.max(0.1, growthRate) / 100)));
+    currentValue += increment;
+    data.push({
+      index: i,
+      followers: currentValue
+    });
+  }
+  const growthPct = parseFloat(((currentValue - baseValue) / baseValue * 100).toFixed(1));
+  return {
+    data,
+    growthPct
+  };
+};
+
+const Sparkline = ({ creatorId, score }: { creatorId: number, score: number }) => {
+  const { data, growthPct } = useMemo(() => generateGrowthData(creatorId, score), [creatorId, score]);
+  const isHighGrowth = growthPct >= 12;
+  const strokeColor = isHighGrowth ? '#0d9488' : '#ea580c'; // Teal for high growth, Coral for moderate growth
+  const gradientId = `sparkline-grad-${creatorId}`;
+
+  return (
+    <div className="w-20 h-7" onClick={(e) => e.stopPropagation()}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 2, bottom: 2, left: 1, right: 1 }}>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.2} />
+              <stop offset="100%" stopColor={strokeColor} stopOpacity={0.0} />
+            </linearGradient>
+          </defs>
+          <RechartsTooltip
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                return (
+                  <div className="bg-deep-navy dark:bg-white text-white dark:text-deep-navy text-[9px] px-1.5 py-0.5 rounded shadow border border-white/10 font-mono font-bold leading-none pointer-events-none z-50">
+                    {payload[0].value?.toLocaleString()}
+                  </div>
+                );
+              }
+              return null;
+            }}
+            cursor={{ stroke: strokeColor, strokeWidth: 1, strokeDasharray: '3 3' }}
+          />
+          <Area
+            type="monotone"
+            dataKey="followers"
+            stroke={strokeColor}
+            strokeWidth={1.5}
+            fill={`url(#${gradientId})`}
+            dot={false}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+const Leaderboard = ({ 
+  isSubpage = false,
+  selectedCreatorIds = [],
+  setSelectedCreatorIds = () => {},
+  onAddToSandbox = () => {}
+}: { 
+  isSubpage?: boolean;
+  selectedCreatorIds?: number[];
+  setSelectedCreatorIds?: React.Dispatch<React.SetStateAction<number[]>>;
+  onAddToSandbox?: (ids: number[]) => void;
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('All');
   const [selectedNiche, setSelectedNiche] = useState('All');
@@ -1240,15 +1704,19 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
 
   // Export search records as standard fully compliant CSV format
   const exportToCSV = () => {
-    const headers = ['Rank', 'Name', 'City', 'Niche', 'Followers', 'SCRAG Score'];
-    const rows = filtered.map((c, idx) => [
-      idx + 1,
-      `"${c.name.replace(/"/g, '""')}"`,
-      `"${c.city.replace(/"/g, '""')}"`,
-      `"${c.niche.replace(/"/g, '""')}"`,
-      `"${c.followers}"`,
-      c.score
-    ]);
+    const headers = ['Rank', 'Name', 'City', 'Niche', 'Followers', '30d Velocity', 'SCRAG Score'];
+    const rows = filtered.map((c, idx) => {
+      const { growthPct } = generateGrowthData(c.id, c.score);
+      return [
+        idx + 1,
+        `"${c.name.replace(/"/g, '""')}"`,
+        `"${c.city.replace(/"/g, '""')}"`,
+        `"${c.niche.replace(/"/g, '""')}"`,
+        `"${c.followers}"`,
+        `"+${growthPct}%"`,
+        c.score
+      ];
+    });
 
     const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1294,16 +1762,20 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
       searchQuery ? `Search Query: "${searchQuery}"` : null
     ].filter(Boolean).join(', ') || 'None';
 
-    const rowsHTML = filtered.map((c, i) => `
+    const rowsHTML = filtered.map((c, i) => {
+      const { growthPct } = generateGrowthData(c.id, c.score);
+      return `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 12px 16px; font-weight: bold; color: #475569;">${i + 1}</td>
         <td style="padding: 12px 16px; font-weight: bold; color: #0f172a;">${c.name}</td>
         <td style="padding: 12px 16px; color: #334155;">${c.city}</td>
         <td style="padding: 12px 16px;"><span style="background-color: rgba(13, 148, 136, 0.1); color: #0d9488; padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500;">${c.niche}</span></td>
         <td style="padding: 12px 16px; color: #475569; font-family: monospace;">${c.followers.toLocaleString()}</td>
+        <td style="padding: 12px 16px; color: ${growthPct >= 12 ? '#0d9488' : '#ea580c'}; font-family: monospace; font-weight: bold;">+${growthPct}%</td>
         <td style="padding: 12px 16px; text-align: right; font-family: Georgia, serif; font-size: 18px; font-weight: bold; color: ${c.score >= 80 ? '#0d9488' : c.score >= 70 ? '#ea580c' : '#d97706'}">${c.score}</td>
       </tr>
-    `).join('');
+      `;
+    }).join('');
 
     doc.write(`
       <html>
@@ -1353,6 +1825,7 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
                 <th>City</th>
                 <th>Niche</th>
                 <th>Followers</th>
+                <th>30d Velocity</th>
                 <th style="text-align: right; width: 120px;">SCRAG Score</th>
               </tr>
             </thead>
@@ -1516,7 +1989,18 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
             <h4 className="font-serif text-base font-bold text-deep-navy dark:text-white">Audited Leaderboard Records</h4>
           </div>
           
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {selectedCreatorIds.length > 0 && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={() => onAddToSandbox(selectedCreatorIds)}
+                title="Send selected creators to campaign simulation sandbox"
+                className="text-xs font-black uppercase tracking-wider text-white bg-teal hover:bg-teal/90 transition-all px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer hover:shadow-lg"
+              >
+                <Plus size={13} /> Add {selectedCreatorIds.length} Selected to Sandbox
+              </motion.button>
+            )}
             <button
               onClick={exportToCSV}
               id="export-csv-btn"
@@ -1537,22 +2021,39 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-border-warm dark:border-white/10 bg-warm-beige/30 dark:bg-white/5">
-                <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Rank</th>
+          <table className="w-full text-left min-w-[950px] block">
+            <thead className="block">
+              <tr className="border-b border-border-warm dark:border-white/10 bg-warm-beige/30 dark:bg-white/5 grid grid-cols-[60px_100px_1.5fr_1fr_1.1fr_1.1fr_1.5fr_0.8fr] items-center">
+                <th className="px-6 py-5 flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={filtered.length > 0 && filtered.every(c => selectedCreatorIds.includes(c.id))}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        const allFilteredIds = filtered.map(c => c.id);
+                        setSelectedCreatorIds(prev => Array.from(new Set([...prev, ...allFilteredIds])));
+                      } else {
+                        const allFilteredIds = filtered.map(c => c.id);
+                        setSelectedCreatorIds(prev => prev.filter(id => !allFilteredIds.includes(id)));
+                      }
+                    }}
+                    className="w-4.5 h-4.5 rounded border-border-warm text-coral focus:ring-coral cursor-pointer accent-coral bg-white dark:bg-deep-navy/30"
+                  />
+                </th>
+                <th className="px-4 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Rank</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Name</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">City</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Niche</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Followers</th>
+                <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest">Growth Trend</th>
                 <th className="px-8 py-5 text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest text-right">SCRAG Score</th>
               </tr>
             </thead>
-            <tbody>
-              <AnimatePresence mode="popLayout text-left">
+            <tbody className="block">
+              <AnimatePresence mode="popLayout">
                 {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center py-20 text-muted dark:text-white/40 text-sm">
+                  <tr className="block w-full">
+                    <td className="text-center py-20 text-muted dark:text-white/40 text-sm block w-full">
                       <div className="flex flex-col items-center gap-3 justify-center max-w-sm mx-auto">
                         <SlidersHorizontal size={28} className="text-coral opacity-50 animate-pulse" />
                         <span className="font-serif text-lg font-bold text-deep-navy dark:text-white">No results found</span>
@@ -1581,15 +2082,44 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.98 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ 
+                        layout: { type: "spring", stiffness: 220, damping: 28 },
+                        opacity: { duration: 0.2 }
+                      }}
                       onClick={() => { window.location.hash = `#creator-profile?id=${creator.id}`; }}
-                      className="border-b border-border-warm dark:border-white/10 hover:bg-warm-beige/40 dark:hover:bg-white/5 transition-all cursor-pointer group/row"
+                      className={`border-b transition-all cursor-pointer group/row table-row-element grid grid-cols-[60px_100px_1.5fr_1fr_1.1fr_1.1fr_1.5fr_0.8fr] items-center ${
+                        idx === 0
+                          ? 'border-amber-400 bg-amber-500/5 dark:bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:bg-amber-500/10 dark:hover:bg-amber-500/15'
+                          : 'border-border-warm dark:border-white/10 hover:bg-warm-beige/40 dark:hover:bg-white/5'
+                      }`}
                     >
-                      <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60">
-                        {idx === 0 && selectedCity === 'All' && selectedNiche === 'All' && searchQuery === '' && (
-                          <span className="bg-coral text-white text-[10px] px-2 py-0.5 rounded mr-2">Top Pick</span>
+                      <td className="px-6 py-5 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={selectedCreatorIds.includes(creator.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedCreatorIds(prev => [...prev, creator.id]);
+                            } else {
+                              setSelectedCreatorIds(prev => prev.filter(id => id !== creator.id));
+                            }
+                          }}
+                          className="w-4.5 h-4.5 rounded border-border-warm text-coral focus:ring-coral cursor-pointer accent-coral bg-white dark:bg-deep-navy/30"
+                        />
+                      </td>
+                      <td className="px-4 py-5 text-sm font-bold text-muted dark:text-white/60">
+                        {idx === 0 ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-amber-600 dark:text-amber-400 font-extrabold text-base">#{idx + 1}</span>
+                          </div>
+                        ) : (
+                          <>
+                            {idx === 0 && selectedCity === 'All' && selectedNiche === 'All' && searchQuery === '' && (
+                              <span className="bg-coral text-white text-[10px] px-2 py-0.5 rounded mr-2">Top Pick</span>
+                            )}
+                            {idx + 1}
+                          </>
                         )}
-                        {idx + 1}
                       </td>
                       <td className="px-8 py-5 font-bold text-deep-navy dark:text-white group-hover/row:text-coral transition-colors flex items-center gap-1.5">
                         <span>{creator.name}</span>
@@ -1600,6 +2130,14 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
                         <span className="text-teal bg-teal/5 px-3 py-1 rounded-full font-medium text-xs border border-teal/10">{creator.niche}</span>
                       </td>
                       <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60">{creator.followers}</td>
+                      <td className="px-8 py-4">
+                        <div className="flex items-center gap-3">
+                          <Sparkline creatorId={creator.id} score={creator.score} />
+                          <span className="text-[11px] font-bold font-mono text-teal bg-teal/5 px-1.5 py-0.5 rounded border border-teal/10">
+                            +{generateGrowthData(creator.id, creator.score).growthPct}%
+                          </span>
+                        </div>
+                      </td>
                       <td className="px-8 py-5 text-right font-serif text-xl font-bold italic">
                         <span className={creator.score >= 80 ? 'text-teal' : creator.score >= 70 ? 'text-coral' : 'text-amber-600'}>
                           {creator.score}
@@ -1617,11 +2155,11 @@ const Leaderboard = ({ isSubpage = false }: { isSubpage?: boolean }) => {
   );
 
   if (isSubpage) {
-    return <div className="relative">{innerContent}</div>;
+    return <div className="relative Leaderboard">{innerContent}</div>;
   }
 
   return (
-    <section className="py-24 bg-surface">
+    <section className="py-24 bg-surface Leaderboard">
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeader 
           label="TOP CREATORS" 
@@ -1763,6 +2301,8 @@ const FadeInSection = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<'home' | string>('home');
+  const [selectedCreatorIds, setSelectedCreatorIds] = useState<number[]>([]);
+  const [simulatedCreators, setSimulatedCreators] = useState<Creator[]>([]);
 
   const openWaitlist = () => setIsWaitlistOpen(true);
 
@@ -1975,11 +2515,29 @@ export default function App() {
             transition={{ duration: 0.4 }}
           >
             <SubPageLayout pageId={currentPage} onBack={() => { window.location.hash = '#home'; }}>
-              {currentPage === 'sandbox' && <Sandbox isSubpage={true} />}
+              {currentPage === 'sandbox' && (
+                <Sandbox 
+                  isSubpage={true} 
+                  simulatedCreators={simulatedCreators}
+                  onResetSimulation={() => setSimulatedCreators([])}
+                />
+              )}
               {currentPage === 'brief-generator' && <AIBriefGenerator />}
               {currentPage === 'predictor' && <OutcomePredictor />}
               {currentPage === 'calculator' && <ScragCalculator isSubpage={true} />}
-              {currentPage === 'leaderboard' && <Leaderboard isSubpage={true} />}
+              {currentPage === 'leaderboard' && (
+                <Leaderboard 
+                  isSubpage={true} 
+                  selectedCreatorIds={selectedCreatorIds}
+                  setSelectedCreatorIds={setSelectedCreatorIds}
+                  onAddToSandbox={(ids) => {
+                    const selected = CREATORS.filter(c => ids.includes(c.id));
+                    setSimulatedCreators(selected);
+                    setCurrentPage('sandbox');
+                    window.location.hash = '#sandbox';
+                  }}
+                />
+              )}
               {currentPage === 'comparison' && <CreatorComparison />}
               {currentPage === 'roi-estimator' && <ROIEstimator />}
               {currentPage === 'niche-chart' && <NichePerformanceChart />}
