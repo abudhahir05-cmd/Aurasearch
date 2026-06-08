@@ -143,6 +143,70 @@ Build a day-by-day influencer campaign timeline.`;
   }
 });
 
+// Campaign Simulator API
+app.post("/api/simulate-campaign", async (req, res) => {
+  try {
+    const { brandName, campaignTitle, goal, audience, region, startDate, endDate, budget, platforms, influencers } = req.body;
+    const model = "gemini-3.5-flash";
+
+    const prompt = `Brand/Company Name: ${brandName}
+Campaign Title: ${campaignTitle || "Untitled Campaign"}
+Campaign Goal: ${goal}
+Target Audience: ${audience}
+Region/City: ${region}
+Start Date: ${startDate}
+End Date: ${endDate}
+Budget: ₹${budget || "N/A"}
+Preferred Platforms: ${platforms ? platforms.join(", ") : "N/A"}
+Influencer Handles: ${influencers ? influencers.join(", ") : "None specified"}
+
+Using this campaign profile, perform a Campaign Simulation using SCRAG (Social Activity, Contextual Relevance, Regional Influence, Audience Trust, Growth Momentum) intelligence.
+Analyze the campaign potential, reach, engagement, and provide actionable localized recommendations.`;
+
+    const response = await ai.models.generateContent({
+      model,
+      contents: prompt,
+      config: {
+        systemInstruction: "You are AuraSearch's Campaign Simulation Engine. Analyze the campaign profile and predict the campaign potential, reach, engagement, and actionable strategic insights. Return ONLY JSON, no markdown formatting (no backticks, no comments). JSON Format:\n{\n  \"campaignScore\": number (0-100),\n  \"estimatedReach\": \"string (e.g. 50k - 75k users)\",\n  \"engagementRange\": \"string (e.g. 4.8% - 6.2%)\",\n  \"insights\": [\n    \"string (strategic actionable recommendation 1)\",\n    \"string (strategic actionable recommendation 2)\",\n    \"string (strategic actionable recommendation 3)\"\n  ],\n  \"scragBreakdown\": {\n    \"socialActivity\": number (0-100),\n    \"contextualRelevance\": number (0-100),\n    \"regionalInfluence\": number (0-100),\n    \"audienceTrust\": number (0-100),\n    \"growthMomentum\": number (0-100)\n  }\n}",
+        responseMimeType: "application/json",
+      },
+    });
+
+    res.json(JSON.parse(response.text || "{}"));
+  } catch (error: any) {
+    console.error("Simulation API Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// AI Timeline Builder API (v2 / Influencer specific)
+app.post("/api/generate-influencer-timeline", async (req, res) => {
+  try {
+    const { handle, context, durationWeeks } = req.body;
+    const model = "gemini-3.5-flash";
+
+    const prompt = `Influencer Handle: ${handle}
+Campaign Context: ${context || "General Brand Promotion"}
+Duration: ${durationWeeks} weeks
+
+Create a week-by-week influencer-specific content calendar and analyze historical post metrics. Keep the timeline exciting and tactical. Provide 1 task/event per week, with details like event description, recommended platform (Instagram/YouTube), and predicted reach boost percentage. Also provide estimated historical posts analysis and topic insights.`;
+
+    const response = await ai.models.generateContent({
+      model,
+      contents: prompt,
+      config: {
+        systemInstruction: "You are the AuraSearch AI Timeline and Influencer Analyst. For the specified influencer handle, contextual brief, and week duration, generate a structural planning roadmap and mock up realistic public-data analytics in JSON format with no markdown, no explanation. JSON Format:\n{\n  \"timelineEvents\": [\n    {\n      \"week\": number,\n      \"event\": \"string (e.g., Unboxing Teaser Reel)\",\n      \"platform\": \"Instagram\" | \"YouTube\" | \"Other\",\n      \"description\": \"string (e.g., Post a high-energy transition Reel demonstrating the item...)\",\n      \"expectedBoost\": \"string (e.g., +12%)\"\n    }\n  ],\n  \"historicalStats\": {\n    \"avgEngagement\": number (e.g., 5.8),\n    \"topPostEngagement\": number (e.g., 9.4),\n    \"topPostDate\": \"string (YYYY-MM-DD)\",\n    \"postingFrequency\": \"string (e.g., 3.4 posts/week)\",\n    \"topPlatform\": \"string (e.g., Instagram Reel)\",\n    \"peakDays\": \"string (e.g., Wednesday & Saturday)\"\n  }\n}",
+        responseMimeType: "application/json",
+      },
+    });
+
+    res.json(JSON.parse(response.text || "{}"));
+  } catch (error: any) {
+    console.error("Influencer Timeline API Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Analyze Trend endpoint
 app.post("/api/analyze-trend", async (req, res) => {
   try {
@@ -176,6 +240,112 @@ Perform a deep analysis of current regional growth patterns, hyper-local marketi
     res.json(JSON.parse(response.text || "{}"));
   } catch (error: any) {
     console.error("Analyze Trend API Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Benchmark Analysis API
+app.post("/api/benchmark-analysis", async (req, res) => {
+  try {
+    const { creatorA, creatorB } = req.body;
+    const model = "gemini-3.5-flash";
+
+    const prompt = `Compare these two Indian creators:
+Creator A:
+- Name: ${creatorA.name}
+- City: ${creatorA.city}
+- Niche: ${creatorA.niche}
+- Followers: ${creatorA.followers}
+- Engagement Rate: ${creatorA.engagementRate}%
+- Avg Likes: ${creatorA.avgLikes}
+- Avg Comments: ${creatorA.avgComments}
+- SCRAG Total Score: ${creatorA.scragTotal}
+- Social Activity: ${creatorA.scragS}
+- Contextual Relevance: ${creatorA.scragC}
+- Regional Influence: ${creatorA.scragR}
+- Audience Trust: ${creatorA.scragA}
+- Growth Momentum: ${creatorA.scragG}
+
+Creator B:
+- Name: ${creatorB.name}
+- City: ${creatorB.city}
+- Niche: ${creatorB.niche}
+- Followers: ${creatorB.followers}
+- Engagement Rate: ${creatorB.engagementRate}%
+- Avg Likes: ${creatorB.avgLikes}
+- Avg Comments: ${creatorB.avgComments}
+- SCRAG Total Score: ${creatorB.scragTotal}
+- Social Activity: ${creatorB.scragS}
+- Contextual Relevance: ${creatorB.scragC}
+- Regional Influence: ${creatorB.scragR}
+- Audience Trust: ${creatorB.scragA}
+- Growth Momentum: ${creatorB.scragG}
+
+Based on these statistics, generate a high-quality, professional, comparative benchmark analysis. Match the style of premium enterprise platforms like CreatorIQ and Sprout Social. Provide their relative competitive positions, strengths, weaknesses, and a recommendation summary of which campaigner goals they align with best. Keep sentences punchy, insightful, and strategic.`;
+
+    const response = await ai.models.generateContent({
+      model,
+      contents: prompt,
+      config: {
+        systemInstruction: "You are the AuraSearch Enterprise Benchmark Analyst. Analyze the comparison metrics of two digital creators and output a strict JSON structure containing the benchmark report. Do not return markdown, backticks, or comments. JSON Format:\n{\n  \"creatorAStrengths\": \"string (2 sentence explanation of A's primary competitive edge)\",\n  \"creatorBStrengths\": \"string (2 sentence explanation of B's primary competitive edge)\",\n  \"suitabilityAnalysis\": \"string (2 sentence analysis explaining which campaigns we recommend Creator A vs Creator B for)\",\n  \"marketPositionA\": \"string (e.g., High-Engagement Niche Specialist)\",\n  \"marketPositionB\": \"string (e.g., Regional Reach Pioneer)\",\n  \"categoryLeadershipA\": number (0-100),\n  \"categoryLeadershipB\": number (0-100)\n}",
+        responseMimeType: "application/json",
+      },
+    });
+
+    res.json(JSON.parse(response.text || "{}"));
+  } catch (error: any) {
+    console.error("Benchmark API Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// SCRAG Calculator Intelligence API
+app.post("/api/scrag-calculator-analysis", async (req, res) => {
+  try {
+    const { creator } = req.body;
+    const model = "gemini-3.5-flash";
+
+    const prompt = `Analyze this digital creator using our SCRAG Framework:
+Name: ${creator.name}
+City: ${creator.city}
+State: ${creator.state}
+Niche: ${creator.niche}
+Followers: ${creator.followers}
+Platform: ${creator.platform}
+Engagement Rate: ${creator.engagementRate}%
+
+SCRAG Metrics (out of 20):
+- Social Activity (S): ${creator.scragS}
+- Contextual Relevance (C): ${creator.scragC}
+- Regional Influence (R): ${creator.scragR}
+- Audience Trust (A): ${creator.scragA}
+- Growth Momentum (G): ${creator.scragG}
+Total SCRAG Score: ${creator.scragTotal} / 100
+
+Generate a highly professional, agency-ready SCRAG audit report in strict JSON format. Each property must contain a tailored, informative text snippet. No backticks, comments, or markdown. Output JSON matches:
+{
+  "strengths": "Provide 1-2 powerful bullet points explaining their main core advantages under the SCRAG framework.",
+  "weaknesses": "Provide 1 highlight of optimization areas or minor risks based on their lowest score parameter.",
+  "audienceQuality": "Brief assessment of audience trust, community attachment, and local demographic loyalty.",
+  "campaignSuitability": "Explanation of how they align with business objectives, conversion ratios, and local activations.",
+  "recommendedCampaignType": "A precise, fancy campaign title (e.g. Ultra-Localized Dialect Engagement Rally),",
+  "riskLevel": "Low | Medium | High",
+  "estimatedQualityTier": "Elite | High Potential | Growth Creator | Emerging Creator",
+  "campaignSuitabilityScore": 0-100 (number)
+}`;
+
+    const response = await ai.models.generateContent({
+      model,
+      contents: prompt,
+      config: {
+        systemInstruction: "You are the AuraSearch Enterprise Performance Auditor. Output a strict JSON structure containing the SCRAG report. Avoid any conversational filler outside of the JSON.",
+        responseMimeType: "application/json",
+      },
+    });
+
+    res.json(JSON.parse(response.text || "{}"));
+  } catch (error: any) {
+    console.error("SCRAG Calculator API Error:", error);
     res.status(500).json({ error: error.message });
   }
 });

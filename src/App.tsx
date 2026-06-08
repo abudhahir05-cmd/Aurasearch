@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence, useInView } from 'motion/react';
+import { motion, AnimatePresence, useInView, LayoutGroup } from 'motion/react';
 import { 
   Check, 
   X, 
@@ -39,6 +39,7 @@ import {
   GraduationCap,
   Download,
   Upload,
+  CheckCircle,
   FileText,
   ExternalLink,
   Search,
@@ -74,8 +75,10 @@ import { DesignSystemPage } from './components/DesignSystemPage';
 import { EnterpriseDashboard } from './components/EnterpriseDashboard';
 import { CreatorProfile } from './components/CreatorProfile';
 import { ContactSection } from './components/ContactSection';
+import { ScragCalculatorModule } from './components/ScragCalculator';
 import { CREATORS_DATA } from './creatorsData';
-const productLogo = '/src/assets/images/product_logo_1779731862866.png';
+// @ts-expect-error - Vite handles PNG asset imports natively, but TypeScript needs inline exemption
+import productLogo from './assets/images/product_logo_1779731862866.png';
 
 const LogoIcon = ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg', className?: string }) => {
   const sizeClasses = {
@@ -190,7 +193,7 @@ const TOOLS_METADATA = [
   { id: 'leaderboard', title: 'Creator Leaderboard', description: 'View the highest SCRAG-scoring verified local creators this week.', icon: <Trophy className="w-5 h-5" /> },
   { id: 'comparison', title: 'Creator Comparison', description: 'Compare metrics, regional relevance, and dialect focus of two creators side-by-side.', icon: <Layers className="w-5 h-5" /> },
   { id: 'roi-estimator', title: 'ROI Estimator', description: 'Estimate conversions, CPA, and return on ad spend across demographics.', icon: <CircleDollarSign className="w-5 h-5" /> },
-  { id: 'niche-chart', title: 'Niche Analytics', description: 'Inspect category performance, dialect depth, and trust indicators.', icon: <BarChart3 className="w-5 h-5" /> },
+  { id: 'niche-chart', title: 'Benchmark Intelligence', description: 'Perform side-by-side competitive audits on SCRAG parameters, niches, and leadership ranks.', icon: <Compass className="w-5 h-5" /> },
   { id: 'creator-profile', title: 'Creator Profile Insight', description: 'Deep-dive analytical dashboard with regional reach, sentiment maps, content feed, and collab history.', icon: <Users className="w-5 h-5" /> },
 ];
 
@@ -451,7 +454,7 @@ const Navbar = ({ onOpenModal, onNavClick, currentPage }: { onOpenModal: () => v
       group: 'Core Engine',
       items: [
         { icon: <Activity size={18} />, title: 'How It Works', desc: '4-step process from scan to prediction', href: '#how-it-works' },
-        { icon: <BarChart3 size={18} />, title: 'Niche Analytics', desc: 'Compare performance across categories', href: '#niche-chart' },
+        { icon: <Compass size={18} />, title: 'Benchmark Intelligence', desc: 'Audit competitors side-by-side', href: '#niche-chart' },
       ]
     },
     {
@@ -998,248 +1001,590 @@ const Sandbox = ({ isSubpage = false }: { isSubpage?: boolean }) => {
 };
 
 const SimulationCardContent = () => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [simulated, setSimulated] = useState(false);
+  const [diagnosticStep, setDiagnosticStep] = useState(0);
 
-  const startSimulation = () => {
-    setIsRunning(true);
-    setStep(0);
-    const interval = setInterval(() => {
-      setStep(prev => {
-        if (prev >= 4) {
-          clearInterval(interval);
-          return 4;
-        }
-        return prev + 1;
-      });
-    }, 800);
-  };
+  // Form Inputs
+  const [brandName, setBrandName] = useState('AuraSearch');
+  const [campaignTitle, setCampaignTitle] = useState('Cosmic Launch');
+  const [goal, setGoal] = useState('Audience Engagement');
+  const [audience, setAudience] = useState('Active travel enthusiasts and young foodies');
+  const [region, setRegion] = useState('Coimbatore');
+  const [startDate, setStartDate] = useState('2026-06-01');
+  const [endDate, setEndDate] = useState('2026-06-30');
+  const [budget, setBudget] = useState('450000');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['Instagram', 'YouTube']);
+  const [selectedHandles, setSelectedHandles] = useState<string[]>(['@sathish_subramaniam', '@lavanya_srinivasan']);
 
-  const findings = [
-    "Local creators discussing travel frustrations",
-    "Audience frustrated with high auto fares",
-    "Peak conversation window: 7–9 AM",
-    "Top creator SCRAG score: 84 / 100"
+  // Search handle logic inside Sim
+  const [handleQuery, setHandleQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  // Simulated Outputs
+  const [campaignScore, setCampaignScore] = useState(82);
+  const [estimatedReach, setEstimatedReach] = useState('45k - 68k users');
+  const [engagementRange, setEngagementRange] = useState('5.1% - 6.8%');
+  const [insights, setInsights] = useState<string[]>([]);
+  const [scragMeters, setScragMeters] = useState({
+    socialActivity: 85,
+    contextualRelevance: 80,
+    regionalInfluence: 90,
+    audienceTrust: 78,
+    growthMomentum: 75
+  });
+
+  const diagnosticTexts = [
+    "Spinning up localized Coimbatore analytics cluster...",
+    "Crawling public historical post records for selected influencers...",
+    "Calculating Regional relevance indices & dialect resonance indicators...",
+    "Running neural campaign brief prediction pipeline...",
   ];
 
-  const outputs = [
-    { label: "Creator", value: "Local commuter influencer" },
-    { label: "Content hook", value: '\"Auto ₹250 😑 → Try Red Taxi 🚖\"' },
-    { label: "Format", value: "Short video + Instagram story" },
-    { label: "Timing", value: "Peak travel hours (7–9 AM)" }
-  ];
-
-  // Map step to descriptive real-time sub-tasks
-  const getStepText = (s: number) => {
-    switch (s) {
-      case 0: return "Booting Coimbatore Sandbox nodes...";
-      case 1: return "Parsing regional micro-vlogs & chats...";
-      case 2: return "Extracting transit feedback and cost sentiments...";
-      case 3: return "Auditing local commute heatmaps...";
-      case 4: return "Simulation success! Report compiled.";
-      default: return "";
+  const togglePlatform = (p: string) => {
+    if (selectedPlatforms.includes(p)) {
+      setSelectedPlatforms(selectedPlatforms.filter(item => item !== p));
+    } else {
+      setSelectedPlatforms([...selectedPlatforms, p]);
     }
   };
 
+  const addCreatorHandle = (handle: string) => {
+    if (!selectedHandles.includes(handle)) {
+      setSelectedHandles([...selectedHandles, handle]);
+    }
+    setHandleQuery('');
+    setShowDropdown(false);
+  };
+
+  const removeHandle = (handle: string) => {
+    setSelectedHandles(selectedHandles.filter(h => h !== handle));
+  };
+
+  const handleSimulate = async () => {
+    if (!brandName || !goal) return;
+    setLoading(true);
+    setSimulated(false);
+    setDiagnosticStep(0);
+
+    // Run diagnostic animation progress
+    const diagInterval = setInterval(() => {
+      setDiagnosticStep(prev => {
+        if (prev >= 3) {
+          clearInterval(diagInterval);
+          return 3;
+        }
+        return prev + 1;
+      });
+    }, 700);
+
+    try {
+      const resp = await fetch('/api/simulate-campaign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brandName,
+          campaignTitle,
+          goal,
+          audience,
+          region,
+          startDate,
+          endDate,
+          budget,
+          platforms: selectedPlatforms,
+          influencers: selectedHandles
+        })
+      });
+
+      if (!resp.ok) {
+        throw new Error('API simulated error');
+      }
+
+      const data = await resp.json();
+      setCampaignScore(data.campaignScore || 80);
+      setEstimatedReach(data.estimatedReach || '35k - 50k');
+      setEngagementRange(data.engagementRange || '4.5% - 6.0%');
+      setInsights(data.insights || ["Target niche displays high brand trust.", "Schedule posts on Wed/Sat evening for peak reach.", "Leverage micro-video format to build awareness."]);
+      if (data.scragBreakdown) {
+        setScragMeters({
+          socialActivity: data.scragBreakdown.socialActivity || 80,
+          contextualRelevance: data.scragBreakdown.contextualRelevance || 80,
+          regionalInfluence: data.scragBreakdown.regionalInfluence || 80,
+          audienceTrust: data.scragBreakdown.audienceTrust || 80,
+          growthMomentum: data.scragBreakdown.growthMomentum || 80
+        });
+      }
+    } catch (err) {
+      console.warn("Simulator API failed, running high-fidelity client mathematical fallback:", err);
+      // Run smart client calculation
+      buildClientSideFallback();
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        setSimulated(true);
+      }, 2400); // Allow diagnosing logs to show elegantly
+    }
+  };
+
+  const buildClientSideFallback = () => {
+    // Generate intelligent stats based on selected creator attributes
+    let baseScore = 65;
+    
+    // Find matched profiles
+    const matches = CREATORS.filter(c => selectedHandles.includes(`@${c.name.toLowerCase().replace(/\s+/g, '_')}`));
+    if (matches.length > 0) {
+      const avgCreatorScore = matches.reduce((acc, c) => acc + c.score, 0) / matches.length;
+      baseScore = Math.round(avgCreatorScore * 1.05); // premium multiplier
+    } else {
+      baseScore = 75 + Math.floor(Math.random() * 15);
+    }
+
+    if (baseScore > 100) baseScore = 98;
+
+    // Calculate approximate reach based on budget
+    const numBudget = parseFloat(budget) || 120000;
+    const estMinReach = Math.round(numBudget * 0.12 * (baseScore / 80));
+    const estMaxReach = Math.round(estMinReach * 1.4);
+
+    setCampaignScore(baseScore);
+    setEstimatedReach(`${(estMinReach / 1000).toFixed(0)}k - ${(estMaxReach / 1000).toFixed(0)}k users`);
+    
+    let baseEr = 4.2;
+    if (matches.length > 0) {
+      baseEr = 5.2; // premium rate average
+    }
+    setEngagementRange(`${baseEr.toFixed(1)}% - ${(baseEr + 1.8).toFixed(1)}%`);
+
+    setInsights([
+      `High contextual resonance detected for selected creators within the ${region} region.`,
+      `Budget ₹${parseFloat(budget).toLocaleString()} distributes ideal frequency caps across scheduled content formats.`,
+      `Verified audience trust levels indicate minimal bot risk, boosting projected organic brand lift.`
+    ]);
+
+    setScragMeters({
+      socialActivity: Math.round(baseScore * 0.95),
+      contextualRelevance: Math.round(baseScore * 1.02) > 100 ? 98 : Math.round(baseScore * 1.02),
+      regionalInfluence: region === 'Coimbatore' || region === 'Chennai' ? 95 : 82,
+      audienceTrust: Math.round(baseScore * 0.92),
+      growthMomentum: Math.round(baseScore * 0.97) > 100 ? 96 : Math.round(baseScore * 0.97)
+    });
+  };
+
+  const handlePrintReport = () => {
+    const printableContent = `
+========================================
+AURASEARCH CAMPAIGN SIMULATION REPORT
+========================================
+Brand Name: ${brandName}
+Campaign Title: ${campaignTitle}
+Goal: ${goal}
+Target Region: ${region}
+Active Budget: ₹${parseFloat(budget).toLocaleString()}
+Timeline Period: ${startDate} to ${endDate}
+Preferred Platforms: ${selectedPlatforms.join(', ')}
+Simulated Campaign Score: ${campaignScore} / 100
+Projected Reach: ${estimatedReach}
+Projected Engagement Rate: ${engagementRange}
+
+SCRAG Dimension Alignment:
+- Social Activity: ${scragMeters.socialActivity}%
+- Contextual Relevance: ${scragMeters.contextualRelevance}%
+- Regional Influence: ${scragMeters.regionalInfluence}%
+- Audience Trust: ${scragMeters.audienceTrust}%
+- Growth Momentum: ${scragMeters.growthMomentum}%
+
+Actionable Localized Strategic Insights:
+${insights.map((ins, idx) => `${idx + 1}. ${ins}`).join('\n')}
+
+========================================
+Generated by AuraSearch Intelligence @ 2026
+========================================
+    `;
+
+    const blob = new Blob([printableContent], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `AuraSearch_Report_${brandName.replace(/\s+/g, '_')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="bg-white dark:bg-deep-navy/30 rounded-[20px] shadow-warm border border-border-warm overflow-hidden">
-      <div className="bg-teal px-8 py-5 flex flex-col md:flex-row md:justify-between md:items-center text-white relative">
-        <div className="mr-4">
-          <h3 className="font-serif text-xl font-bold">Red Taxi · Coimbatore · Transport & Commute</h3>
+    <div className="py-2">
+      <div className="grid lg:grid-cols-5 gap-8 items-start">
+        {/* Left Inputs Panel */}
+        <div className="lg:col-span-2 space-y-5 bg-white dark:bg-deep-navy/30 p-6 rounded-3xl border border-border-warm dark:border-white/10 shadow-sm relative">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="p-1.5 rounded-lg bg-teal/10 text-teal flex items-center justify-center shrink-0">
+              <SlidersHorizontal size={18} />
+            </span>
+            <h3 className="font-serif text-lg font-bold text-deep-navy dark:text-white">Simulator Inputs</h3>
+          </div>
+
+          <div className="space-y-4">
+            {/* Brand + title */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Brand Name</label>
+                <input 
+                  type="text"
+                  value={brandName}
+                  onChange={e => setBrandName(e.target.value)}
+                  className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none focus:border-coral"
+                  placeholder="e.g. AuraSearch"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Campaign Title</label>
+                <input 
+                  type="text"
+                  value={campaignTitle}
+                  onChange={e => setCampaignTitle(e.target.value)}
+                  className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none focus:border-coral"
+                  placeholder="e.g. Summer Special"
+                />
+              </div>
+            </div>
+
+            {/* Region + Goal */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Goal Priority</label>
+                <select 
+                  value={goal}
+                  onChange={e => setGoal(e.target.value)}
+                  className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none"
+                >
+                  {['Brand Awareness', 'Audience Engagement', 'Conversion Boost', 'Local Store Visits'].map(g => (
+                    <option key={g} className="text-deep-navy">{g}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Target Region / City</label>
+                <select 
+                  value={region}
+                  onChange={e => setRegion(e.target.value)}
+                  className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none"
+                >
+                  {['Coimbatore', 'Chennai', 'Bangalore', 'Mumbai', 'Delhi', 'Hyderabad', 'Kochi', 'Pune'].map(c => (
+                    <option key={c} className="text-deep-navy">{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Start and End Date picker */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Start Date</label>
+                <input 
+                  type="date"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                  className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">End Date</label>
+                <input 
+                  type="date"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                  className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Validation row */}
+            {startDate && endDate && new Date(endDate) < new Date(startDate) && (
+              <p className="text-[10px] font-bold text-red-500 leading-none">⚠️ End Date cannot be earlier than Start Date.</p>
+            )}
+
+            {/* Target Brief Context */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Audience Persona Brief</label>
+              <textarea 
+                rows={2}
+                value={audience}
+                onChange={e => setAudience(e.target.value)}
+                className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none resize-none"
+                placeholder="e.g. Young office workers with high-income commute habits..."
+              />
+            </div>
+
+            {/* Budget */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Allocated Budget (Local Currency ₹)</label>
+              <input 
+                type="number"
+                value={budget}
+                onChange={e => setBudget(e.target.value)}
+                className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none focus:border-coral"
+                placeholder="e.g. 500000"
+              />
+            </div>
+
+            {/* Platforms checkboxes */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Preferred Digital Outlets</span>
+              <div className="flex flex-wrap gap-4">
+                {['Instagram', 'YouTube', 'TikTok', 'Twitter'].map(plat => (
+                  <label key={plat} className="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-deep-navy dark:text-white select-none">
+                    <input 
+                      type="checkbox"
+                      checked={selectedPlatforms.includes(plat)}
+                      onChange={() => togglePlatform(plat)}
+                      className="accent-coral rounded cursor-pointer"
+                    />
+                    <span>{plat}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Selected Influencers badges and selectors */}
+            <div className="space-y-2 relative">
+              <label className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-wider block">Add Influencers to simulation</label>
+              
+              <div className="relative">
+                <input 
+                  type="text"
+                  value={handleQuery}
+                  onChange={e => {
+                    setHandleQuery(e.target.value);
+                    setShowDropdown(true);
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  className="w-full bg-warm-beige dark:bg-white/5 p-3 rounded-xl border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white focus:outline-none"
+                  placeholder="Type to search and add verified creators..."
+                />
+                
+                {showDropdown && (
+                  <div className="absolute z-20 left-0 right-0 mt-1 max-h-48 bg-white dark:bg-deep-navy border border-border-warm dark:border-white/10 rounded-xl shadow-xl overflow-y-auto">
+                    {CREATORS.filter(c => 
+                      c.name.toLowerCase().includes(handleQuery.toLowerCase()) && 
+                      !selectedHandles.includes(`@${c.name.toLowerCase().replace(/\s+/g, '_')}`)
+                    ).map(c => {
+                      const computedHandle = `@${c.name.toLowerCase().replace(/\s+/g, '_')}`;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => addCreatorHandle(computedHandle)}
+                          className="w-full text-left px-3.5 py-2 hover:bg-warm-beige dark:hover:bg-white/5 text-xs font-bold text-deep-navy dark:text-white flex justify-between"
+                        >
+                          <span>{c.name}</span>
+                          <span className="text-[10px] text-muted dark:text-teal uppercase">{c.niche}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* List added badges */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {selectedHandles.map(h => (
+                  <div key={h} className="text-[10px] font-bold px-2.5 py-1 bg-coral/10 text-coral rounded-lg border border-coral/20 flex items-center gap-1">
+                    <span>{h}</span>
+                    <button type="button" onClick={() => removeHandle(h)} className="text- coral hover:text-red-500 font-bold ml-1">✕</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Simulate Trigger Button */}
+            <button
+              onClick={handleSimulate}
+              disabled={loading || !brandName || new Date(endDate) < new Date(startDate)}
+              className="w-full bg-deep-navy dark:bg-teal text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-coral dark:hover:bg-teal/90 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider select-none disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin text-white" />
+                  <span>Simulating Results...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
+                  <span>Simulate Campaign</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Right Output Panel */}
+        <div className="lg:col-span-3 min-h-[450px]">
           <AnimatePresence mode="wait">
-            {isRunning && (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 4 }}
-                className="text-[11px] font-mono uppercase tracking-wider font-bold text-coral-light/90 mt-1.5 flex items-center gap-1.5"
+            {loading ? (
+              <motion.div 
+                key="loading" 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center justify-center h-[520px] bg-white dark:bg-deep-navy/10 rounded-3xl border border-dashed border-border-warm dark:border-white/10 p-12 text-center"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-coral animate-ping" />
-                <span>{getStepText(step)}</span>
+                <div className="relative w-14 h-14 mb-4">
+                  <div className="absolute inset-0 border-4 border-coral/20 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-t-coral rounded-full animate-spin"></div>
+                </div>
+                <h4 className="font-serif text-lg font-bold text-deep-navy dark:text-white mb-2">Simulating Campaign Alignment...</h4>
+                
+                {/* Rolling real-time diagnosis */}
+                <span className="text-[11px] font-mono uppercase tracking-wider text-coral bg-coral/10 px-3 py-1.5 rounded-xl mt-3 animate-pulse">
+                  {diagnosticTexts[diagnosticStep]}
+                </span>
               </motion.div>
+            ) : simulated ? (
+              <motion.div 
+                key="results" 
+                initial={{ opacity: 0, scale: 0.98 }} 
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-6"
+              >
+                {/* Top Metrics Row */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {/* Score badge */}
+                  <div className="bg-white dark:bg-deep-navy/30 p-6 rounded-3xl border border-border-warm dark:border-white/10 flex flex-col items-center justify-center text-center">
+                    <span className="text-[9px] font-bold text-muted dark:text-white/40 uppercase tracking-widest block mb-1">Campaign Potential</span>
+                    <div className="relative w-20 h-20 flex items-center justify-center">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle cx="40" cy="40" r="34" className="stroke-warm-beige dark:stroke-white/10 fill-none" strokeWidth="6" />
+                        <circle cx="40" cy="40" r="34" className="stroke-teal fill-none" strokeWidth="6" strokeDasharray="213" strokeDashoffset={213 - (213 * campaignScore) / 100} strokeLinecap="round" />
+                      </svg>
+                      <span className="absolute font-serif text-2xl font-black text-deep-navy dark:text-white">{campaignScore}</span>
+                    </div>
+                  </div>
+
+                  {/* Reach */}
+                  <div className="p-6 bg-white dark:bg-deep-navy/30 rounded-3xl border border-border-warm dark:border-white/10 flex flex-col justify-center">
+                    <span className="text-[9px] font-bold text-muted dark:text-white/40 uppercase tracking-widest mb-1.5">Projected Reach</span>
+                    <span className="text-xl font-serif font-black text-coral">{estimatedReach}</span>
+                    <span className="text-[9px] text-muted dark:text-white/40 mt-1 leading-none">Aligned with selected budget & platforms</span>
+                  </div>
+
+                  {/* Engagement */}
+                  <div className="p-6 bg-white dark:bg-deep-navy/30 rounded-3xl border border-border-warm dark:border-white/10 flex flex-col justify-center col-span-2 md:col-span-1">
+                    <span className="text-[9px] font-bold text-muted dark:text-white/40 uppercase tracking-widest mb-1.5">Est. Engagement Rate</span>
+                    <span className="text-xl font-serif font-black text-teal">{engagementRange}</span>
+                    <span className="text-[9px] text-muted dark:text-white/40 mt-1 leading-none">Historical average trust multiplier applied</span>
+                  </div>
+                </div>
+
+                {/* SCRAG Dimension breakdown meters */}
+                <div className="bg-white dark:bg-deep-navy/30 p-6 rounded-3xl border border-border-warm dark:border-white/10 shadow-sm space-y-4">
+                  <h4 className="text-[10px] font-bold text-muted dark:text-white/40 uppercase tracking-widest block border-b border-border-warm dark:border-white/5 pb-2">SCRAG Parameter Fit</h4>
+                  
+                  <div className="space-y-3.5">
+                    {/* Activity */}
+                    <div>
+                      <div className="flex justify-between items-center text-xs font-bold text-deep-navy dark:text-white/80 mb-1">
+                        <span>Social Activity Frequency</span>
+                        <span>{scragMeters.socialActivity}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-warm-beige dark:bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-teal" style={{ width: `${scragMeters.socialActivity}%` }} />
+                      </div>
+                    </div>
+
+                    {/* Context */}
+                    <div>
+                      <div className="flex justify-between items-center text-xs font-bold text-deep-navy dark:text-white/80 mb-1">
+                        <span>Contextual Brief Relevance</span>
+                        <span>{scragMeters.contextualRelevance}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-warm-beige dark:bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-teal" style={{ width: `${scragMeters.contextualRelevance}%` }} />
+                      </div>
+                    </div>
+
+                    {/* Regional */}
+                    <div>
+                      <div className="flex justify-between items-center text-xs font-bold text-deep-navy dark:text-white/80 mb-1">
+                        <span>Regional Tamil/Indian Resonance</span>
+                        <span>{scragMeters.regionalInfluence}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-warm-beige dark:bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-coral" style={{ width: `${scragMeters.regionalInfluence}%` }} />
+                      </div>
+                    </div>
+
+                    {/* Trust */}
+                    <div>
+                      <div className="flex justify-between items-center text-xs font-bold text-deep-navy dark:text-white/80 mb-1">
+                        <span>Audience Authenticity & Trust</span>
+                        <span>{scragMeters.audienceTrust}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-warm-beige dark:bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-teal" style={{ width: `${scragMeters.audienceTrust}%` }} />
+                      </div>
+                    </div>
+
+                    {/* Growth */}
+                    <div>
+                      <div className="flex justify-between items-center text-xs font-bold text-deep-navy dark:text-white/80 mb-1">
+                        <span>Creator Growth Momentum</span>
+                        <span>{scragMeters.growthMomentum}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-warm-beige dark:bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-teal" style={{ width: `${scragMeters.growthMomentum}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Insights and actions */}
+                <div className="p-6 bg-teal/5 border border-teal/10 rounded-3xl space-y-4">
+                  <span className="text-[10px] font-bold text-teal uppercase tracking-widest block leading-none">Strategic AI Diagnostics</span>
+                  <ul className="space-y-3">
+                    {insights.map((ins, i) => (
+                      <li key={i} className="flex gap-2.5 items-start text-xs leading-relaxed text-deep-navy dark:text-white/80 font-bold">
+                        <CheckCircle size={15} className="text-teal shrink-0 mt-0.5" />
+                        <span>{ins}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Reports Export bar */}
+                <div className="bg-white dark:bg-deep-navy/30 p-4 rounded-2xl border border-border-warm dark:border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3">
+                  <span className="text-[11px] font-bold text-muted dark:text-white/40 italic">Simulation completed statically using SCRAG V3 predictive pipeline.</span>
+                  
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={handlePrintReport}
+                      className="px-4 py-2 bg-warm-beige dark:bg-white/5 border border-border-warm dark:border-white/10 text-xs font-bold text-deep-navy dark:text-white rounded-xl flex items-center gap-1.5 transition-all select-none hover:bg-warm-beige/80"
+                    >
+                      <Download size={14} /> Download Report
+                    </button>
+                    <a
+                      href="#leaderboard"
+                      className="px-4 py-2 bg-coral text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all select-none hover:bg-coral/95"
+                    >
+                      Shortlist Creators →
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="h-[520px] flex flex-col items-center justify-center text-muted dark:text-white/30 border-2 border-dashed border-border-warm dark:border-white/10 rounded-[32px] p-8 text-center italic">
+                <BarChart3 size={52} className="mb-4 opacity-15 text-teal" />
+                <span className="font-serif text-sm font-bold not-italic text-deep-navy dark:text-white mb-1">Pre-Campaign Analytical Center</span>
+                Configure the campaign simulation options on the left and submit details to generate localized potential outcomes.
+              </div>
             )}
           </AnimatePresence>
         </div>
-        
-        <button 
-          onClick={startSimulation}
-          disabled={isRunning && step < 4}
-          className="relative mt-4 md:mt-0 bg-white text-teal text-xs font-bold px-6 py-3 rounded-full shadow-md hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-80 disabled:hover:scale-100 overflow-hidden min-w-[170px] select-none text-center"
-        >
-          {/* Animated loading progress bar background filling the button */}
-          {isRunning && step < 4 && (
-            <motion.div 
-              className="absolute inset-y-0 left-0 bg-teal/15 dark:bg-teal/20"
-              initial={{ width: '0%' }}
-              animate={{ width: `${(step / 4) * 100}%` }}
-              transition={{ duration: 0.8, ease: "linear" }}
-            />
-          )}
-
-          <span className="relative z-10 flex items-center justify-center gap-2">
-            {isRunning && step < 4 ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-teal shrink-0" />
-                <span>Simulating... {step * 25}%</span>
-              </>
-            ) : isRunning && step === 4 ? (
-              <span className="text-teal font-extrabold flex items-center gap-1">
-                ✓ Re-run Simulation
-              </span>
-            ) : (
-              <span>Run Simulation</span>
-            )}
-          </span>
-        </button>
       </div>
-      
-      <div className="grid md:grid-cols-2 gap-0">
-        <div className="p-8 border-r border-border-warm">
-          <h4 className="text-deep-navy dark:text-white font-bold text-sm uppercase tracking-widest mb-6">What SCRAG Found</h4>
-          <ul className="space-y-4">
-            {findings.map((item, i) => {
-              const isVisible = isRunning && step >= (i + 1);
-              return (
-                <motion.li 
-                  key={i}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={isVisible ? { opacity: 1, x: 0 } : { opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 100, damping: 15 }}
-                  className="flex items-start gap-3"
-                >
-                  <Check size={16} className="text-teal mt-1 shrink-0" />
-                  <span className="text-muted dark:text-white/60 text-sm leading-relaxed">{item}</span>
-                </motion.li>
-              );
-            })}
-          </ul>
-        </div>
-        
-        <div className="p-8 bg-warm-beige/30 dark:bg-white/5">
-          <h4 className="text-deep-navy dark:text-white font-bold text-sm uppercase tracking-widest mb-6">Campaign Output</h4>
-          <div className="space-y-6">
-            {outputs.map((out, i) => {
-              const isVisible = isRunning && step >= (i + 1);
-              return (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 100, damping: 15 }}
-                >
-                  <div className="text-[10px] font-bold text-muted dark:text-white/40 uppercase mb-1">{out.label}</div>
-                  <div className="text-deep-navy dark:text-white font-bold">{out.value}</div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-      
-      <AnimatePresence>
-        {step === 4 && (
-          <motion.div 
-            initial={{ height: 0 }}
-            animate={{ height: 'auto' }}
-            className="bg-teal/10 border-t border-border-warm overflow-hidden"
-          >
-            <div className="p-6 text-center text-teal font-serif text-lg font-bold flex items-center justify-center gap-3">
-              <span>Higher Trust</span>
-              <ArrowRight size={20} />
-              <span>Better Engagement</span>
-              <ArrowRight size={20} />
-              <span>Increased Bookings</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
 
 const ScragCalculator = ({ isSubpage = false }: { isSubpage?: boolean }) => {
-  const [scores, setScores] = useState({ S: 15, C: 15, R: 15, A: 15, G: 15 });
-  
-  const total = scores.S + scores.C + scores.R + scores.A + scores.G;
-  
-  const getVerdict = (score: number) => {
-    if (score >= 70) return { text: "Strong campaign fit — recommended", color: "text-teal" };
-    if (score >= 50) return { text: "Moderate fit — use with targeting", color: "text-coral" };
-    return { text: "Low fit — refine your search", color: "text-red-500" };
-  };
-  
-  const verdict = getVerdict(total);
-
-  const innerContent = (
-    <div className="grid md:grid-cols-2 gap-16 items-center">
-      <div className="space-y-8">
-        {SCRAG_DIMENSIONS.map(dim => (
-          <div key={dim.key} className="space-y-3">
-            <div className="flex justify-between items-center text-sm font-bold text-deep-navy dark:text-white">
-              <span>{dim.key} – {dim.name}</span>
-              <span className="text-coral bg-coral/5 px-2 py-0.5 rounded">{scores[dim.key as keyof typeof scores]}/20</span>
-            </div>
-            <input 
-              type="range" 
-              min="0" 
-              max="20" 
-              value={scores[dim.key as keyof typeof scores]} 
-              onChange={(e) => setScores({ ...scores, [dim.key]: parseInt(e.target.value) })}
-              className="w-full accent-coral"
-            />
-            <p className="text-[11px] text-muted dark:text-white/40 leading-tight">{dim.desc}</p>
-          </div>
-        ))}
-      </div>
-      
-      <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-deep-navy/40 rounded-[40px] shadow-warm border border-border-warm dark:border-white/10 relative">
-         {/* Score Ring */}
-         <div className="relative w-64 h-64 flex items-center justify-center">
-           <svg className="w-full h-full -rotate-90">
-             <circle 
-               cx="128" cy="128" r="110" 
-               className="fill-none stroke-deep-navy/5 dark:stroke-white/5" 
-               strokeWidth="12" 
-             />
-             <motion.circle 
-                cx="128" cy="128" r="110" 
-                className="fill-none stroke-coral" 
-                strokeWidth="12" 
-                strokeLinecap="round"
-                initial={{ strokeDasharray: "0 1000" }}
-                animate={{ strokeDasharray: `${(total / 100) * 690} 1000` }}
-                transition={{ type: "spring", damping: 20, stiffness: 100 }}
-             />
-           </svg>
-           <div className="absolute inset-0 flex flex-col items-center justify-center">
-             <span className="text-6xl font-extrabold text-deep-navy dark:text-white">{total}</span>
-             <span className="text-xs font-bold text-muted dark:text-white/40 uppercase tracking-widest">Total SCRAG</span>
-           </div>
-         </div>
-         
-         <div className={`mt-10 font-serif text-xl font-bold text-center ${verdict.color}`}>
-           {verdict.text}
-         </div>
-      </div>
-    </div>
-  );
-
-  if (isSubpage) {
-    return <div className="relative">{innerContent}</div>;
-  }
-
-  return (
-    <section className="py-24 bg-warm-beige/50 dark:bg-white/5 border-y border-border-warm dark:border-white/10">
-      <div className="max-w-6xl mx-auto px-6">
-        <SectionHeader 
-          label="TRY IT YOURSELF" 
-          title="Calculate a Creator's SCRAG Score" 
-        />
-        {innerContent}
-      </div>
-    </section>
-  );
+  return <ScragCalculatorModule />;
 };
 
 // --- Sparkline and Growth Trend Helpers ---
@@ -1674,114 +2019,137 @@ const Leaderboard = ({
               </tr>
             </thead>
             <tbody className="block">
-              <AnimatePresence mode="popLayout">
-                {filtered.length === 0 ? (
-                  <tr className="block w-full">
-                    <td className="text-center py-20 text-muted dark:text-white/40 text-sm block w-full">
-                      <div className="flex flex-col items-center gap-3 justify-center max-w-sm mx-auto">
-                        <SlidersHorizontal size={28} className="text-coral opacity-50 animate-pulse" />
-                        <span className="font-serif text-lg font-bold text-deep-navy dark:text-white">No results found</span>
-                        <span className="text-xs leading-relaxed text-muted/80">
-                          Try relaxing your filtering parameters, adjusting the minimum SCRAG rating score slider, or typing a different keyword.
-                        </span>
-                        <button
-                          onClick={() => {
-                            setSearchQuery('');
-                            setSelectedCity('All');
-                            setSelectedNiche('All');
-                            setMinScore(60);
-                          }}
-                          className="mt-2 text-xs font-bold text-white bg-coral hover:bg-coral/95 px-4 py-2 rounded-xl transition-all"
-                        >
-                          Clear All Filters
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((creator, idx) => (
-                    <motion.tr 
-                      key={creator.id}
-                      layout
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.98 }}
-                      transition={{ 
-                        layout: { type: "spring", stiffness: 220, damping: 28 },
-                        opacity: { duration: 0.2 }
-                      }}
-                      onClick={() => { window.location.hash = `#creator-profile?id=${creator.id}`; }}
-                      className={`border-b transition-all cursor-pointer group/row table-row-element grid grid-cols-[110px_1.4fr_0.9fr_0.9fr_0.9fr_1.4fr_0.7fr_1.1fr] items-center ${
-                        idx === 0
-                          ? 'border-amber-400 bg-amber-500/5 dark:bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:bg-amber-500/10 dark:hover:bg-amber-500/15'
-                          : 'border-border-warm dark:border-white/10 hover:bg-warm-beige/40 dark:hover:bg-white/5'
-                      }`}
-                    >
-                      <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60 flex items-center">
-                        {idx === 0 ? (
-                          <div className="flex items-center gap-2">
-                            <span className="bg-gradient-to-r from-amber-500 to-amber-400 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-[0_2px_8px_rgba(245,158,11,0.25)] border border-amber-300/60 flex items-center gap-1 shrink-0 animate-pulse">
-                              👑 Top Creator
-                            </span>
-                            <span className="text-amber-600 dark:text-amber-400 font-extrabold text-base">#{idx + 1}</span>
-                          </div>
-                        ) : (
-                          <>
-                            {idx === 0 && selectedCity === 'All' && selectedNiche === 'All' && searchQuery === '' && (
-                              <span className="bg-coral text-white text-[10px] px-2 py-0.5 rounded mr-2">Top Pick</span>
-                            )}
-                            {idx + 1}
-                          </>
-                        )}
-                      </td>
-                      <td className="px-8 py-5 font-bold text-deep-navy dark:text-white group-hover/row:text-coral transition-colors flex items-center gap-1.5">
-                        <span>{creator.name}</span>
-                        <ArrowUpRight size={14} className="opacity-0 group-hover/row:opacity-100 transition-opacity text-coral shrink-0" />
-                      </td>
-                      <td className="px-8 py-5 text-sm text-deep-navy dark:text-white/80">{creator.city}</td>
-                      <td className="px-8 py-5 text-sm">
-                        <span className="text-teal bg-teal/5 px-3 py-1 rounded-full font-medium text-xs border border-teal/10">{creator.niche}</span>
-                      </td>
-                      <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60">{creator.followers}</td>
-                      <td className="px-8 py-4">
-                        <div className="flex items-center gap-3">
-                          <Sparkline creatorId={creator.id} score={creator.score} />
-                          <span className="text-[11px] font-bold font-mono text-teal bg-teal/5 px-1.5 py-0.5 rounded border border-teal/10">
-                            +{generateGrowthData(creator.id, creator.score).growthPct}%
+              <LayoutGroup id="leaderboard-grid">
+                <AnimatePresence mode="popLayout">
+                  {filtered.length === 0 ? (
+                    <tr className="block w-full">
+                      <td className="text-center py-20 text-muted dark:text-white/40 text-sm block w-full">
+                        <div className="flex flex-col items-center gap-3 justify-center max-w-sm mx-auto">
+                          <SlidersHorizontal size={28} className="text-coral opacity-50 animate-pulse" />
+                          <span className="font-serif text-lg font-bold text-deep-navy dark:text-white">No results found</span>
+                          <span className="text-xs leading-relaxed text-muted/80">
+                            Try relaxing your filtering parameters, adjusting the minimum SCRAG rating score slider, or typing a different keyword.
                           </span>
+                          <button
+                            onClick={() => {
+                              setSearchQuery('');
+                              setSelectedCity('All');
+                              setSelectedNiche('All');
+                              setMinScore(60);
+                            }}
+                            className="mt-2 text-xs font-bold text-white bg-coral hover:bg-coral/95 px-4 py-2 rounded-xl transition-all"
+                          >
+                            Clear All Filters
+                          </button>
                         </div>
                       </td>
-                      <td className="px-8 py-5 text-right font-serif text-xl font-bold italic">
-                        <span className={creator.score >= 80 ? 'text-teal' : creator.score >= 70 ? 'text-coral' : 'text-amber-600'}>
-                          {creator.score}
-                        </span>
-                      </td>
-                      <td className="px-8 py-5 flex justify-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (onToggleCompare) onToggleCompare(creator.id);
+                    </tr>
+                  ) : (
+                    filtered.map((creator, idx) => {
+                      const globalIdx = CREATORS.findIndex(c => c.id === creator.id);
+                      const currentRank = idx + 1;
+                      const globalRank = globalIdx + 1;
+                      const rankDifference = globalRank - currentRank;
+                      return (
+                        <motion.tr 
+                          key={creator.id}
+                          layout="position"
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.98 }}
+                          transition={{ 
+                            layout: { type: "spring", stiffness: 280, damping: 24, mass: 0.7 },
+                            opacity: { duration: 0.2 }
                           }}
-                          className={`px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all flex items-center gap-1 whitespace-nowrap leading-none border select-none ${
-                            (compareAId === creator.id || compareBId === creator.id)
-                              ? 'bg-teal border-teal text-white shadow-md shadow-teal/20'
-                              : 'bg-warm-beige/80 dark:bg-white/10 text-deep-navy dark:text-white border-border-warm dark:border-white/15 hover:bg-coral hover:text-white hover:border-coral'
+                          onClick={() => { window.location.hash = `#creator-profile?id=${creator.id}`; }}
+                          className={`border-b transition-all cursor-pointer group/row table-row-element grid grid-cols-[110px_1.4fr_0.9fr_0.9fr_0.9fr_1.4fr_0.7fr_1.1fr] items-center ${
+                            idx === 0
+                              ? 'border-amber-400 bg-amber-500/5 dark:bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:bg-amber-500/10 dark:hover:bg-amber-500/15'
+                              : 'border-border-warm dark:border-white/10 hover:bg-warm-beige/40 dark:hover:bg-white/5'
                           }`}
                         >
-                          {(compareAId === creator.id || compareBId === creator.id) ? (
-                            <>
-                              <Check size={12} className="shrink-0" />
-                              <span>Comparing</span>
-                            </>
-                          ) : (
-                            <span>+ Compare</span>
-                          )}
-                        </button>
-                      </td>
-                    </motion.tr>
-                  ))
-                )}
-              </AnimatePresence>
+                          <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60 flex items-center">
+                            <div className="flex items-center gap-2">
+                              {idx === 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="bg-gradient-to-r from-amber-500 to-amber-400 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-[0_2px_8px_rgba(245,158,11,0.25)] border border-amber-300/60 flex items-center gap-1 shrink-0 animate-pulse">
+                                    👑 Top Creator
+                                  </span>
+                                  <span className="text-amber-600 dark:text-amber-400 font-extrabold text-base">#{idx + 1}</span>
+                                </div>
+                              ) : (
+                                <>
+                                  {idx === 0 && selectedCity === 'All' && selectedNiche === 'All' && searchQuery === '' && (
+                                    <span className="bg-coral text-white text-[10px] px-2 py-0.5 rounded mr-2">Top Pick</span>
+                                  )}
+                                  <span className="text-sm font-extrabold text-deep-navy dark:text-white/80">#{idx + 1}</span>
+                                </>
+                              )}
+                              
+                              {/* Rank Difference Badge */}
+                              {rankDifference > 0 && (
+                                <motion.span
+                                  initial={{ opacity: 0, scale: 0.7, x: -6 }}
+                                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="inline-flex items-center gap-0.5 text-[9px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-1.5 py-0.5 rounded cursor-default"
+                                  title={`Global Rank: #${globalRank}. Climbed ${rankDifference} spot${rankDifference > 1 ? 's' : ''} in search!`}
+                                >
+                                  ▲{rankDifference}
+                                </motion.span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-8 py-5 font-bold text-deep-navy dark:text-white group-hover/row:text-coral transition-colors flex items-center gap-1.5">
+                            <span>{creator.name}</span>
+                            <ArrowUpRight size={14} className="opacity-0 group-hover/row:opacity-100 transition-opacity text-coral shrink-0" />
+                          </td>
+                          <td className="px-8 py-5 text-sm text-deep-navy dark:text-white/80">{creator.city}</td>
+                          <td className="px-8 py-5 text-sm">
+                            <span className="text-teal bg-teal/5 px-3 py-1 rounded-full font-medium text-xs border border-teal/10">{creator.niche}</span>
+                          </td>
+                          <td className="px-8 py-5 text-sm font-bold text-muted dark:text-white/60">{creator.followers}</td>
+                          <td className="px-8 py-4">
+                            <div className="flex items-center gap-3">
+                              <Sparkline creatorId={creator.id} score={creator.score} />
+                              <span className="text-[11px] font-bold font-mono text-teal bg-teal/5 px-1.5 py-0.5 rounded border border-teal/10">
+                                +{generateGrowthData(creator.id, creator.score).growthPct}%
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-8 py-5 text-right font-serif text-xl font-bold italic">
+                            <span className={creator.score >= 80 ? 'text-teal' : creator.score >= 70 ? 'text-coral' : 'text-amber-600'}>
+                              {creator.score}
+                            </span>
+                          </td>
+                          <td className="px-8 py-5 flex justify-center">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onToggleCompare) onToggleCompare(creator.id);
+                              }}
+                              className={`px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all flex items-center gap-1 whitespace-nowrap leading-none border select-none ${
+                                (compareAId === creator.id || compareBId === creator.id)
+                                  ? 'bg-teal border-teal text-white shadow-md shadow-teal/20'
+                                  : 'bg-warm-beige/80 dark:bg-white/10 text-deep-navy dark:text-white border-border-warm dark:border-white/15 hover:bg-coral hover:text-white hover:border-coral'
+                              }`}
+                            >
+                              {(compareAId === creator.id || compareBId === creator.id) ? (
+                                <>
+                                  <Check size={12} className="shrink-0" />
+                                  <span>Comparing</span>
+                                </>
+                              ) : (
+                                <span>+ Compare</span>
+                              )}
+                            </button>
+                          </td>
+                        </motion.tr>
+                      );
+                    })
+                  )}
+                </AnimatePresence>
+              </LayoutGroup>
             </tbody>
           </table>
         </div>
