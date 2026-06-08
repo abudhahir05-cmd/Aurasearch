@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useInView, LayoutGroup } from 'motion/react';
 import { 
   Check, 
   X, 
+  RotateCcw,
   ChevronRight, 
   Menu, 
   ArrowRight, 
@@ -277,13 +278,13 @@ const SubPageLayout = ({ pageId, children, onBack }: { pageId: string, children:
   return (
     <div className="min-h-screen bg-surface dark:bg-[#060a13] pt-28 pb-10 px-6">
       {/* Page Header Area */}
-      <div className="max-w-7xl mx-auto mb-10">
+      <div className="max-w-7xl mx-auto mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-border-warm dark:border-white/5">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs font-bold text-muted dark:text-white/40 uppercase tracking-widest">
-              <span>Platform</span>
+              <span>Platform Suite</span>
               <ChevronRight size={12} className="text-muted/50" />
-              <span className="text-coral">{pageMeta.title}</span>
+              <span className="text-coral">Active Workspace</span>
             </div>
             <h1 className="font-serif text-3xl md:text-5xl font-bold text-deep-navy dark:text-white mt-2">
               {pageMeta.title}
@@ -299,6 +300,45 @@ const SubPageLayout = ({ pageId, children, onBack }: { pageId: string, children:
           >
             ← Back to Home
           </button>
+        </div>
+      </div>
+
+      {/* Premium Dashboard Navigation Tabs */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="bg-warm-beige/40 dark:bg-deep-navy/30 border border-border-warm dark:border-white/5 p-1.5 rounded-2xl">
+          <div 
+            className="flex items-center gap-1.5 overflow-x-auto"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {TOOLS_METADATA.map((tool) => {
+              const isActive = tool.id === pageId;
+              return (
+                <button
+                  key={tool.id}
+                  onClick={() => {
+                    window.location.hash = '#' + tool.id;
+                  }}
+                  className={`relative flex items-center gap-2.5 px-4 py-3.5 rounded-xl text-xs font-extrabold transition-all shrink-0 select-none whitespace-nowrap cursor-pointer ${
+                    isActive 
+                      ? 'text-coral' 
+                      : 'text-muted dark:text-white/60 hover:text-deep-navy dark:hover:text-white'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeSubpageTabHighlight"
+                      className="absolute inset-0 bg-white dark:bg-deep-navy/70 rounded-xl shadow-sm border border-border-warm/40 dark:border-white/5"
+                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                    />
+                  )}
+                  <span className={`relative z-10 transition-colors ${isActive ? 'text-coral' : 'text-muted/65 dark:text-white/40'}`}>
+                    {React.cloneElement(tool.icon, { size: 15 })}
+                  </span>
+                  <span className="relative z-10">{tool.title}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
       
@@ -319,31 +359,40 @@ const SubPageLayout = ({ pageId, children, onBack }: { pageId: string, children:
         
         {/* Right Side: Quick Pivoters / Sidebar controls */}
         <div className="col-span-12 lg:col-span-3 space-y-6">
-          {/* Quick Pivot Panel */}
+          {/* Workspace Advisor Checklist */}
           <div className="bg-white dark:bg-deep-navy/20 p-6 rounded-[24px] border border-border-warm dark:border-white/10 shadow-sm">
             <h3 className="text-xs font-black text-deep-navy dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2 pb-3 border-b border-border-warm dark:border-white/5">
-              <Sparkles size={14} className="text-coral" /> Other Active Tools
+              <Sparkles size={14} className="text-coral" /> Campaign Diagnosis
             </h3>
-            <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
-              {TOOLS_METADATA.filter(t => t.id !== pageId).map(t => (
-                <a
-                  key={t.id}
-                  href={`#${t.id}`}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-warm-beige dark:hover:bg-white/5 border border-transparent hover:border-border-warm/50 dark:hover:border-white/5 transition-all group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-coral/5 flex items-center justify-center shrink-0 group-hover:bg-coral/10">
-                    {React.cloneElement(t.icon, { size: 16, className: 'text-coral' })}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-deep-navy dark:text-white group-hover:text-coral transition-colors truncate">
-                      {t.title}
-                    </div>
-                    <div className="text-[10px] text-muted dark:text-white/40 truncate">
-                      Go to tool
-                    </div>
-                  </div>
-                </a>
-              ))}
+            <div className="space-y-3.5 pt-1">
+              <div className="flex items-start gap-2.5">
+                <div className="w-4 h-4 rounded bg-teal/10 dark:bg-teal/20 text-teal flex items-center justify-center text-[10px] font-bold mt-0.5 shrink-0">✓</div>
+                <div>
+                  <div className="text-xs font-bold text-deep-navy dark:text-white">Scan Regional Dialects</div>
+                  <div className="text-[10px] text-muted dark:text-white/40 leading-normal">Database of 32 regional dialects synchronized.</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <div className="w-4 h-4 rounded bg-teal/10 dark:bg-teal/20 text-teal flex items-center justify-center text-[10px] font-bold mt-0.5 shrink-0">✓</div>
+                <div>
+                  <div className="text-xs font-bold text-deep-navy dark:text-white">Qualify Creator SCRAG</div>
+                  <div className="text-[10px] text-muted dark:text-white/40 leading-normal">Interactive metrics validated in sandbox context.</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <div className="w-4 h-4 rounded bg-coral/10 dark:bg-coral/20 text-coral flex items-center justify-center text-[10px] font-bold mt-0.5 shrink-0">→</div>
+                <div>
+                  <div className="text-xs font-bold text-deep-navy dark:text-white">Predict Outcomes</div>
+                  <div className="text-[10px] text-muted dark:text-white/40 leading-normal">Active simulation modeling is actively running.</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <div className="w-4 h-4 rounded bg-border-warm text-muted flex items-center justify-center text-[10px] font-bold mt-0.5 shrink-0">○</div>
+                <div>
+                  <div className="text-xs font-bold text-muted">Generate Briefs</div>
+                  <div className="text-[10px] text-muted/60 leading-normal">Establish prompt variables to output custom pitch briefing doc.</div>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -1852,6 +1901,30 @@ const Leaderboard = ({
     <>
       {/* Advanced Discovery Controls */}
       <div className="mb-10 bg-white/70 dark:bg-deep-navy/40 backdrop-blur-md border border-border-warm dark:border-white/10 p-6 rounded-[24px] shadow-sm">
+        {/* Global Reset and Filter Title Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 mb-5 border-b border-border-warm/65 dark:border-white/5">
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-coral/10 text-coral">
+              <SlidersHorizontal size={14} />
+            </span>
+            <span className="text-xs font-black text-deep-navy dark:text-white uppercase tracking-widest">
+              Discovery Engine Filters
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedCity('All');
+              setSelectedNiche('All');
+              setMinScore(60);
+            }}
+            id="global-clear-filters-btn"
+            className="text-xs font-extrabold font-sans text-white bg-coral hover:bg-coral/90 dark:bg-coral/80 dark:hover:bg-coral/90 px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all hover:shadow hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+          >
+            <RotateCcw size={14} /> Clear All Filters & Reset
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
           
           {/* Global Search Bar */}
